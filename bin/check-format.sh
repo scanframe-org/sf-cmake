@@ -15,6 +15,17 @@ if [[ "${GIT_PRE_COMMIT_HOOK}" == "1" ]]; then
 	arguments+=('--quiet')
 	# Add git-diff noticed files only for checking.
 	arguments+=('--git-hook')
+# Check if called from a GitHub Actions pipeline.
+elif [[ "${GITHUB_ACTIONS}" == "true" ]]; then
+	# Check if called as part of a pull request.
+	if [[ -z "${GITHUB_BASE_REF}" ]]; then
+		echo "Not checking format due to non-pull-request pipeline being active."
+		exit 0
+	fi
+	# Fetch the base branch for comparison.
+	git fetch --depth 1 origin "${GITHUB_BASE_REF}"
+	# Tell the script to compare against the base branch.
+	arguments+=('--branch' "origin/${GITHUB_BASE_REF}")
 # Check if called from a GitLab pipeline.
 elif [[ "${CI}" == "true" ]]; then
 	# Check if called as part of a merge request.
@@ -28,8 +39,9 @@ elif [[ "${CI}" == "true" ]]; then
 else
 	echo "Redirection to script 'cmake/lib/bin/clang-format.sh'.
 
-This script is to be called from a git 'pre-commit' hook or
-when an Gitlab merge-request is pipeline is running.
+This script is to be called from a git 'pre-commit' hook,
+a GitHub Actions pull-request pipeline, or
+a GitLab merge-request pipeline.
 "
 	# Add the directories to check for this repository.
 	arguments+=("${@}")

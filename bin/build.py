@@ -26,7 +26,7 @@ Author: Arjan van Olphen <arjan@scanframe.nl>
 from __future__ import annotations
 import sys
 
-# sys.dont_write_bytecode = True
+sys.dont_write_bytecode = True
 import argparse
 import configparser
 import copy
@@ -52,11 +52,9 @@ import base64
 import http.client
 import ssl
 import uuid
-from datetime import datetime
-from dataclasses import dataclass
 from enum import Enum, auto
 from string import Template
-from typing import List, Any, Dict, Optional, Tuple
+from typing import List, Any, Dict, Optional
 from pathlib import Path
 from abc import ABC, abstractmethod
 from urllib.request import urlopen
@@ -99,17 +97,17 @@ library-base-url=https://nexus.scanframe.com/repository/shared/library
 
 ; Sematic versioning type impact map.
 [config-ver-type-map]
-fix=patch,Bugfix
 feat=minor,Feature
+revert=patch,Revert of Commit
+fix=patch,Bugfix
+perf=patch,Performance
+refactor=patch,Code Refactoring
 build=patch,Build Tool/Process
-chore=patch,Chore
 ci=patch,CI Configuration
 docs=patch,Documentation
 style=patch,Code Formatting/Styling
-refactor=patch,Code Refactoring
-perf=patch,Performance
+chore=patch,Chore
 test=none,Test Addition/Modification
-revert=patch,Revert of Commit
 
 ; Section for optional include file which is merged.
 [__include__]
@@ -791,7 +789,6 @@ def get_merged_config_section(section: str, fail: bool = True) -> Dict[str, str]
 		current_items = dict(CONFIG.items(current_section) if current_section else {})
 		# Extract inheritance instructions
 		if inheritance_val := current_items.pop("__inherit__", None):
-			# noinspection PyUnresolvedReferences
 			parents = [p.strip() for p in inheritance_val.split(",")]
 			for parent in parents:
 				if parent and not CONFIG.has_section(parent):
@@ -1034,7 +1031,6 @@ def remove_tree(dir_name: Path) -> None:
 	:return: None
 	"""
 
-	# noinspection PyUnusedLocal
 	def remove_readonly(func, path, exc_info):
 		"""
 		Change the file mode before deleting to allow deletion.
@@ -2211,7 +2207,6 @@ examples:
 		"""
 		# Call parent to handle the common dry-run option.
 		super().handle(args, args_left, args_right)
-		# noinspection PyDeprecation
 		if shutil.which("wine") is None:
 			logger.error(f"! The 'wine' command not found. Please install required packages.")
 			return 1
@@ -2381,7 +2376,6 @@ Choices are:
 				if not xauth:
 					# noinspection SpellCheckingInspection
 					xauth = Path.home() / ".Xauthority"
-				# noinspection SpellCheckingInspection
 				docker_opts += ["--env", "DISPLAY", "--volume", f"{xauth}:/home/user/.Xauthority:ro"]
 			if "XDG_RUNTIME_DIR" in RUN_ENV:
 				audio_socket = f"{RUN_ENV["XDG_RUNTIME_DIR"]}/pulse/native"
@@ -2667,7 +2661,7 @@ Choices are depended on the host platform:
 			lines.append("@echo off")
 			for key in sorted(config_vars):
 				if key in RUN_ENV and key in export_vars:
-					val = RUN_ENV[key]
+					val = RUN_ENV.get(key)
 					lines.append(f"set {key}={val}")
 					# Special handling for LD_LIBRARY_PATH to prefix the PATH.
 					if key == "LD_LIBRARY_PATH":
@@ -2676,7 +2670,7 @@ Choices are depended on the host platform:
 			lines.append("#!/usr/bin/env bash")
 			for key in sorted(config_vars):
 				if key in RUN_ENV and key in export_vars:
-					val = RUN_ENV[key]
+					val = RUN_ENV.get(key)
 					lines.append(f"export {key}=\"{val}\"")
 					# Special handling for LD_LIBRARY_PATH to prefix the PATH.
 					if key == "LD_LIBRARY_PATH":
@@ -2784,7 +2778,6 @@ Choices are depended on the host platform:
 		project structure is set up and optionally adds files or directories to a Git repository.
 		:return: True indicates success and False indicates failure.
 		"""
-		# noinspection PyDeprecation
 		if shutil.which("git") is None:
 			logger.info("! Git is required and not installed run with option '--required' first!")
 			return False
@@ -2976,10 +2969,8 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 		# Prefix the target with the system name.
 		target = sys.platform + '/' + target
 		logger.info(f"# Target: {target}")
-		# noinspection PyBroadException
 		try:
 			if target == "linux/dio":
-				# noinspection PyDeprecation
 				if shutil.which("docker"):
 					logger.warning(f"# Command 'docker' command is already available.")
 					return
@@ -2987,7 +2978,6 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 					["sudo", "apt-get", "--yes", "install", "docker.io"], dbg_mode=DebugMode.REPORT_ONLY)
 			elif target == "linux/dce":
 				# Check if the 'docker' command exists.
-				# noinspection PyDeprecation
 				if shutil.which("docker"):
 					logger.warning(f"# Command 'docker' command is already available.")
 					return
@@ -3086,7 +3076,6 @@ Signed-By:
 			elif target == "linux/win":
 				run_command(["sudo", "apt-get", "install", "-y", "mingw-w64", "nsis"], dbg_mode=DebugMode.REPORT_ONLY)
 				# Check if wine is installed using shutil.which (cleaner than command -v)
-				# noinspection PyDeprecation
 				if not shutil.which("wine"):
 					run_command(["sudo", "apt-get", "--yes", "install", "wine"], dbg_mode=DebugMode.REPORT_ONLY)
 
@@ -3152,7 +3141,6 @@ Signed-By:
 							["winget", "install", "--disable-interactivity", "--accept-source-agreements", "--exact", "--id", pkg_id],
 							dbg_mode=DebugMode.REPORT_ONLY)
 				# When the apt-cyg shell script is found, install also the Cygwin packages.
-				# noinspection PyDeprecation
 				if target == "cygwin/win" and shutil.which("apt-cyg") is not None:
 					# Cygwin Packages
 					cg_pkgs = ["dialog", "recode", "perl-Image-ExifTool", "graphviz", "pcre", "jq", "unzip", "colordiff",
@@ -3174,461 +3162,6 @@ Signed-By:
 		except Exception as ex:
 			logger.exception(f"! An unexpected error occurred during package installation.")
 			raise ex
-
-
-class SubCommandVersion(SubCommand):
-	"""Subcommand handler for the 'version' command for repository version reporting and bumping."""
-
-	@dataclass()
-	class CommitCacheEntry:
-		"""Holds the commit message information."""
-
-		name: str
-		date: datetime
-		msg: str
-
-		def __init__(self, commit_msg: str):
-			"""Constructor taking the formatted message string."""
-			lines = commit_msg.split("\n")
-			self.name = lines[0]
-			self.date = datetime.strptime(lines[1], "%a %b %d %H:%M:%S %Y %z")
-			self.msg = "\n".join(lines[2:])
-
-		@staticmethod
-		def get_format_string() -> str:
-			"""Get the commit message format string."""
-			return "%cn\n%cd\n%B"
-
-	_header_regex = re.compile(r"^([a-z_\-]+)(\(([a-z_\-]+)\))?(!)?:\s(.*)$")
-	_increment_order = {"none": 0, "patch": 1, "minor": 2, "major": 3}
-	# Holds the type map from ini config file.
-	_type_map: dict[str, tuple[str, str]] = {}
-	# Cache for commit message retrieval.
-	_cache_get_cmt_msg: dict[str, CommitCacheEntry] = {}
-	# Cache for the git-describe-exact tag retrieval.
-	_cache_git_describe_exact: dict[str, str] = {}
-	# Module directory to work on.
-	_module_dir: str = "."
-
-	def __init__(self):
-		super().__init__("version", ["v"])
-		# Read the type map from the ini config file.
-		for key, value in get_config_section("config-ver-type-map", fail=True).items():
-			self._type_map[key] = (*value.split(',', 1),)
-
-	def create_parser(self, subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
-		self.parser = subparsers.add_parser(self.command, aliases=self.aliases, add_help=False,
-			formatter_class=argparse.RawTextHelpFormatter,
-			help="Report or bump semantic version based on conventional commits.")
-		self.parser.epilog = f"""
-examples:
-
-  {self.script} version info
-  {self.script} version bump -V
-  {self.script} version bump --msg-file version-bump.msgs.json
-  {self.script} version bump --module cmake/lib info -ad
-"""
-		if self.parser is None:
-			raise ValueError("Parser cannot be None")
-		return self.parser
-
-	def options(self, parser: argparse.ArgumentParser):
-		"""Adds options to the version subcommand."""
-		super().options(parser)
-		parser.add_argument("-V", "--verbose", action="store_true", help="Output extra processing information.")
-		parser.add_argument("-m", "--module", type=str, metavar="<module>", help="Submodule directory to work on.")
-		parser.add_argument("-c", "--commit", type=str, metavar="<hash/tag>",
-			help="Commit hash to tag as new version (defaults to last commit/HEAD when omitted).")
-		parser.add_argument("-a", "--all", action="store_true",
-			help="Use all commits and not only merge commits in the process.")
-		parser.add_argument("-s", "--select", action="store_true",
-			help="Interactively select the target commit since last release tag (respecting merges flag).")
-		parser.add_argument("--msg-file", type=str, metavar="<file>",
-			help="JSON file containing replacement messages for commit hashes (for debugging).")
-		parser.add_argument("-l", "--long", action="store_true",
-			help="Use long (full) git hashes; default prints short hashes.")
-		parser.add_argument("action", nargs="?", choices=["info", "bump"],
-			help="""
-info: Report repository version information on the merge commits.
-bump: Generate release notes from the last or given commit hash.""")
-		parser.epilog = """
-
-message header format:
-  <type>(<scope>)!: <short summary>
-  │       │      │      └─⫸ Summary in an imperative mood.
-  │       │      └─⫸ Optional exclamation mark '!' indicating a breaking change.
-  │       └─⫸ Commit Scope: common|compiler|config|cmake|changelog|docs-infra|pack|iface|etc...
-  └─⫸ Commit Type: build|ci|chore|docs|feat|fix|perf|refactor|style|test|revert
-
-type to change map:
-"""
-		for key, value in self._type_map.items():
-			parser.epilog += f"  {key} {' ' * (10 - len(key))}{value[0]} {' ' * (8 - len(value[0]))}{value[1]}\n"
-		parser.epilog += f"""
-examples:
-  Report versioning information using the last commit to determine the new version:
-    ./{self.script} {self.command} info
-  Report versioning information using a by a dialog selected commit:
-    ./{self.script} {self.command} info -s
-  Create Markdown release-notes in 'doc/release' directory for specified hash or tag:
-    ./{self.script} {self.command} bump -c b8d37e2
-    ./{self.script} {self.command} bump -c v0.1.0-rc.5
-"""
-		return parser
-
-	def handle(self, args: argparse.Namespace, args_left: List[str], args_right: List[str] | None) -> int:
-		"""Handles the version reporting/bumping."""
-		super().handle(args, args_left, args_right)
-		if args.module:
-			self._module_dir = args.module
-		merges_only = not args.all
-		logger.info(f"# Commits processed: {"Merges only" if merges_only else "All"}")
-		if args.select:
-			commit_hash = self.select_commit(merges_only)
-		elif args.commit:
-			# Convert the short or tag to a full commit hash.
-			commit_hash = self.git(["rev-parse", args.commit], check=True)
-		else:
-			commit_hash = self.git(["rev-parse", "--verify", "HEAD"], check=True)
-		git_top_level = self.git(["rev-parse", "--show-toplevel"], check=True)
-		cur_ver_tag, tag_found = self.get_latest_non_rc_tag()
-		tag_annotation = self.get_tag_annotation(cur_ver_tag) if tag_found else ""
-		msg_overrides = self.load_message_overrides(args.msg_file)
-		long_hash = args.long
-		if args.action == "info":
-			self.report_version_tags(git_top_level, cur_ver_tag, tag_found, commit_hash, merges_only, msg_overrides,
-				tag_annotation, long_hash=long_hash)
-			self.bump_version(info_only=True, cur_ver_tag=cur_ver_tag, commit_hash=commit_hash, merges_only=merges_only,
-				verbose=args.verbose, tag_found=tag_found, overrides=msg_overrides, git_top_level=git_top_level)
-		elif args.action == "bump":
-			self.bump_version(info_only=False, cur_ver_tag=cur_ver_tag, commit_hash=commit_hash, merges_only=merges_only,
-				verbose=args.verbose, tag_found=tag_found, overrides=msg_overrides, git_top_level=git_top_level)
-		else:
-			logger.info("! Missing version command.")
-			return 1
-		return 0
-
-	@staticmethod
-	def escape_markdown(text: str | None) -> str:
-		"""Escapes basic Markdown characters."""
-		if text is None:
-			return ""
-		escaped = text
-		replacements = {
-			"\\": "&#92;",
-			"`": "&#96;",
-			"*": "&#42;",
-			"#": "&#35;",
-			"[": "&#91;",
-			"]": "&#93;",
-		}
-		for src, dst in replacements.items():
-			escaped = escaped.replace(src, dst)
-		return escaped
-
-	# noinspection PyMethodMayBeStatic
-	def git(self, args: List[str], check: bool = False) -> str:
-		"""Runs git command and returns stdout as string."""
-		result = run_command(["git", "-C", self._module_dir] + args, capture_output=True, check=check,
-			dbg_mode=DebugMode.SILENT)
-		return result.stdout.decode("utf-8").strip()
-
-	def git_lines(self, args: List[str], check: bool = False) -> List[str]:
-		"""Runs git and returns non-empty lines."""
-		return [ln for ln in self.git(args, check=check).splitlines() if ln.strip()]
-
-	# noinspection PyMethodMayBeStatic
-	def git_describe_exact(self, commit_hash: str) -> str:
-		"""Returns exact matching tag or '...' when none."""
-		if commit_hash in self._cache_git_describe_exact:
-			return self._cache_git_describe_exact[commit_hash]
-		result = run_command(["git", "describe", "--exact-match", commit_hash], capture_output=True, check=False,
-			dbg_mode=DebugMode.SILENT)
-		result = result.stdout.decode("utf-8").strip() if result.returncode == 0 else "..."
-		self._cache_git_describe_exact[commit_hash] = result
-		return result
-
-	def get_latest_non_rc_tag(self) -> Tuple[str, bool]:
-		"""Returns the latest non-RC tag and flag indicating existence."""
-		tags = [tag for tag in self.git_lines(["tag", "--list", "--format", "%(tag)"], check=False)
-			if re.match(r"^v\d+\.\d+\.\d+$", tag)]
-		if not tags:
-			return "v0.0.0", False
-		tags.sort(key=lambda t: tuple(int(x) for x in t[1:].split(".")), reverse=True)
-		return tags[0], True
-
-	# noinspection PyMethodMayBeStatic
-	def get_tag_annotation(self, tag: str) -> str:
-		"""Returns annotation text for tag."""
-		result = run_command(["git", "cat-file", "tag", tag], capture_output=True, check=False,
-			dbg_mode=DebugMode.SILENT)
-		if result.returncode != 0:
-			return ""
-		raw = result.stdout.decode("utf-8", errors="ignore")
-		parts = raw.split("\n\n", 1)
-		return parts[1].strip() if len(parts) == 2 else ""
-
-	# noinspection PyMethodMayBeStatic
-	def get_git_tag_version(self) -> Tuple[str, str, str, str]:
-		"""Returns tuple (version, rc, commits, hash) parsed from git describe information."""
-		result = run_command(["git", "-C", self._module_dir, "describe", "--dirty", "--match", "v*.*.*"],
-			capture_output=True, check=False, dbg_mode=DebugMode.SILENT)
-		desc = result.stdout.decode("utf-8").strip()
-		match = re.match(
-			r"^v(?P<ver>[0-9]+\.[0-9]+\.[0-9]+)(-rc\.?(?P<rc>[0-9]+))?(-((?P<commits>[0-9]+)?(-(?P<hash>[a-z0-9]+))?)?)?(-dirty)?$",
-			desc)
-		if not match:
-			return "0.0.0", "", "", ""
-		return match.group("ver") or "0.0.0", match.group("rc") or "", match.group("commits") or "", match.group(
-			"hash") or ""
-
-	@staticmethod
-	def git_tag_version_string(version_info: Tuple[str, str, str, str]) -> str:
-		"""Formats the git describe tuple into a version string."""
-		version, rc, commits, _ = version_info
-		result = version
-		if rc:
-			result += f"~rc{rc}"
-		if commits:
-			result += f"+{commits}"
-		return result
-
-	# noinspection PyMethodMayBeStatic
-	def load_message_overrides(self, msg_file: str | None) -> Dict[str, str]:
-		"""Loads message overrides from JSON or shell-format file."""
-		if msg_file is None:
-			json_default = os.path.join(RUN_DIR, ".version-bump.json")
-			if os.path.exists(json_default):
-				msg_file = json_default
-			else:
-				return {}
-		if not os.path.exists(msg_file):
-			logger.warning(f": Message file '{msg_file}' not found, ignoring.")
-			return {}
-		with open(msg_file, "r", encoding="utf-8") as fh:
-			data = json.load(fh)
-		if isinstance(data, dict):
-			return {k: str(v) for k, v in data.items()}
-		logger.warning(f": Message file '{msg_file}' has unsupported JSON structure, ignoring.")
-		return {}
-
-	# noinspection PyMethodMayBeStatic
-	def get_commit_message(self, commit_hash: str, overrides: Dict[str, str]) -> CommitCacheEntry:
-		"""Returns commit message with overrides applied."""
-		# Check the cache for the entry.
-		if commit_hash in self._cache_get_cmt_msg:
-			return self._cache_get_cmt_msg[commit_hash]
-		#  Get the formated message string.
-		result = run_command(
-			["git", "-C", self._module_dir, "show", "--no-patch", f"--format={self.CommitCacheEntry.get_format_string()}",
-				commit_hash],
-			capture_output=True,
-			check=False, dbg_mode=DebugMode.SILENT)
-		result = result.stdout.decode("utf-8", errors="ignore").strip()
-		entry = self.CommitCacheEntry(result)
-		# When this commit msg is overridden, assign the message text.
-		if commit_hash in overrides:
-			entry.msg = overrides[commit_hash]
-		# Cache the entry.
-		self._cache_get_cmt_msg[commit_hash] = entry
-		return entry
-
-	# noinspection PyMethodMayBeStatic
-	def collect_commits(self, cur_ver_tag: str, commit_hash: str, merges_only: bool, tag_found: bool) -> List[str]:
-		"""Collects commits between tag and commit hash (or from root when no tag)."""
-		cmd = ["git", "-C", self._module_dir, "log"]
-		if merges_only:
-			cmd.append("--merges")
-		cmd += ["--pretty=format:%H"]
-		cmd.append(f"{cur_ver_tag}^..{commit_hash}" if tag_found else commit_hash)
-		result = run_command(cmd, capture_output=True, check=False, dbg_mode=DebugMode.SILENT)
-		if result.returncode != 0 and not result.stdout:
-			return []
-		return [ln for ln in result.stdout.decode("utf-8").splitlines() if ln.strip()]
-
-	def calculate_next_for_commit(self, cur_ver_tag: str, commit_hash: str, merges_only: bool, tag_found: bool,
-		overrides: dict[str, str]
-	) -> tuple[str, str]:
-		"""Returns the prospective next version tag if bumped at commit_hash."""
-		effect_max = "minor" if not tag_found else "none"
-		for commit in self.collect_commits(cur_ver_tag, commit_hash, merges_only, tag_found):
-			msg_string = self.get_commit_message(commit, overrides).msg
-			if not msg_string:
-				continue
-			msg_header = msg_string.split("\n", 1)[0]
-			match = self._header_regex.match(msg_header)
-			if not match:
-				continue
-			msg_type = match.group(1)
-			msg_breaking = match.group(4)
-			type_effect = self._type_map.get(msg_type, ("none", ""))[0]
-			effect = "major" if msg_breaking else type_effect
-			effect_max = self.compare_increments(effect, effect_max)
-		if effect_max == "none":
-			return cur_ver_tag, effect_max
-		base_ver = cur_ver_tag[1:] if cur_ver_tag.startswith("v") else cur_ver_tag
-		result = f"v{self.increment_version(base_ver, effect_max)}"
-		return result, effect_max
-
-	def select_commit(self, merges_only: bool) -> str:
-		"""Prompts the user to select a commit since the last tag."""
-		cur_ver_tag, tag_found = self.get_latest_non_rc_tag()
-		commits = self.collect_commits(cur_ver_tag, "HEAD", merges_only, tag_found)
-		if not commits:
-			raise subprocess.CalledProcessError(returncode=1, cmd=["git", "-C", self._module_dir, "log"], output=b"",
-				stderr=b"No commits found")
-		options = {}
-		for commit in commits:
-			cmt_msg = self.get_commit_message(commit, {})
-			heading = cmt_msg.msg.split("\n", 1)[0].strip()
-			display = f"{commit[:7]} | {cmt_msg.date} | {heading}"
-			options[commit] = display
-		choice = ask_selection(options=options, title="Select Commit", caption="Choose commit for version calculation")
-		if choice is None:
-			raise subprocess.CalledProcessError(returncode=1, cmd=["selection"], output=b"", stderr=b"No commit selected")
-		return str(choice)
-
-	@staticmethod
-	def compare_increments(effect: str, effect_max: str) -> str:
-		"""Returns the maximum increment."""
-		return effect if SubCommandVersion._increment_order.get(effect, 0) > SubCommandVersion._increment_order.get(
-			effect_max, 0) else effect_max
-
-	@staticmethod
-	def increment_version(version: str, effect: str) -> str:
-		"""Increments version string based on effect."""
-		parts = version.split(".")
-		while len(parts) < 3:
-			parts.append("0")
-		major, minor, patch = [int(x) for x in parts[:3]]
-		if effect == "patch":
-			patch += 1
-		elif effect == "minor":
-			minor += 1
-			patch = 0
-		elif effect == "major":
-			major += 1
-			minor = 0
-			patch = 0
-		return f"{major}.{minor}.{patch}"
-
-	def bump_version(self, info_only: bool, cur_ver_tag: str, commit_hash: str, merges_only: bool, verbose: bool,
-		tag_found: bool, overrides: Dict[str, str], git_top_level: str
-	):
-		"""Calculates the next version and optionally writes release notes."""
-		effect_max = "minor" if not tag_found else "none"
-		md_table_lines: List[str] = ["| # | Type | Effect | Scope | Change |", "|---:|:---|:---|:---|:---|"]
-		md_change_lines: List[str] = []
-		counter = 0
-		commits = self.collect_commits(cur_ver_tag, commit_hash, merges_only, tag_found)
-		if verbose:
-			logger.info(f"\n# Conventional commits from version: {cur_ver_tag} to ({commit_hash})")
-		for commit in commits:
-			cmt_msg = self.get_commit_message(commit, overrides)
-			msg_string = cmt_msg.msg
-			if not msg_string:
-				continue
-			msg_header = msg_string.split("\n", 1)[0]
-			match = self._header_regex.match(msg_header)
-			if not match:
-				if verbose:
-					logger.info(f"~ Ignoring commit: {commit}")
-				continue
-			msg_type = match.group(1)
-			msg_scope = match.group(3) or ""
-			msg_breaking = match.group(4)
-			msg_heading = match.group(5)
-			msg_body = msg_string.split("\n", 1)[1] if "\n" in msg_string else ""
-			type_effect = self._type_map.get(msg_type, ("none", ""))[0]
-			effect = "major" if msg_breaking else type_effect
-			effect_max = self.compare_increments(effect, effect_max)
-			if verbose:
-				logger.info(f"= Accepting commit: {commit}")
-				logger.info(
-					f"Heading\t{msg_heading}\nType\t{msg_type}\nScope\t{msg_scope}\nBreak\t[{msg_breaking}]\nVersion Effect\t{effect}")
-				if msg_body.strip():
-					logger.info(msg_body)
-			if not info_only:
-				counter += 1
-				md_table_lines.append(
-					f"| **{counter}** | {self._type_map.get(msg_type, ('', ''))[1]} | {effect} | {msg_scope} | {msg_heading} |")
-				md_change_lines.append(
-					f"#### {counter}) {self._type_map.get(msg_type, ('', ''))[1]}: {self.escape_markdown(msg_heading)}\n\n{msg_body}\n\n---\n")
-
-		logger.info("\n# Version Bump")
-		if effect_max == "none":
-			logger.info(": Changes maximum effect (none) do not bump the version.")
-			return
-		base_ver = cur_ver_tag[1:] if cur_ver_tag.startswith("v") else cur_ver_tag
-		next_ver_tag = f"v{self.increment_version(base_ver, effect_max)}"
-		logger.info(f"Current ver/tag  : {cur_ver_tag}")
-		logger.info(f"Max-effect       : {effect_max}")
-		logger.info(f"Upto commit      : {commit_hash}")
-		logger.info(f"Next version/tag : {next_ver_tag}")
-
-		if not info_only:
-			notes_dir = os.path.join(git_top_level, "doc", "release")
-			os.makedirs(notes_dir, exist_ok=True)
-			md_file = os.path.join(notes_dir, f"notes-{next_ver_tag}.md")
-			with open(md_file, "w", encoding="utf-8") as fh:
-				fh.write(f"# Release-notes Version {next_ver_tag}\n\n")
-				fh.write(f"## Changelist since version {cur_ver_tag}\n\n")
-				fh.write("\n".join(md_table_lines))
-				fh.write("\n\n### Changes\n")
-				fh.write("\n".join(md_change_lines))
-			logger.info(f"- Release notes written to {md_file}")
-
-	def report_version_tags(self, git_top_level: str, cur_ver_tag: str, tag_found: bool, commit_hash: str,
-		merges_only: bool, overrides: Dict[str, str], tag_annotation: str, long_hash: bool = False
-	):
-		"""Reports the versions, the annotated tags, and the commit ranges."""
-
-		def fmt_hash(h: str) -> str:
-			"""Formats the given hash to a character short one taking the first 7 characters."""
-			return h if long_hash else h[:7]
-
-		hash_w = 40 if long_hash else 8
-		logger.info("\n# Top level directory")
-		logger.info(git_top_level)
-
-		logger.info("\n# Current versions")
-		logger.info(f"Package (Git) : {self.git_tag_version_string(self.get_git_tag_version())}")
-		logger.info(f'Last non-rc   : {cur_ver_tag} "{tag_annotation}"')
-		if not tag_found:
-			logger.info(f": No current git version tag was found using '{cur_ver_tag}'.")
-
-		logger.info("\n# Annotated version-tags")
-		logger.info(f"~Tag{'':<11} | Hash{'':<{hash_w - 4}} | Time       | Annotation")
-		for line in reversed(self.git_lines(["tag", "--list", "--format", "%(tag)\t%(object)\t%(subject)"], check=False)):
-			tag, obj, subject = (line.split("\t", 2) + ["", "", ""])[:3]
-			if not re.match(r"^v\d+\.\d+\.\d+(-rc\.\d+)?$", tag):
-				continue
-			cmt_msg = self.get_commit_message(fmt_hash(obj), {})
-			logger.info(f"{tag:<15} | {fmt_hash(obj):<{hash_w}} | {cmt_msg.date.date()} | \"{subject}\"")
-
-		if False:
-			logger.info("\n# All merge commits")
-			logger.info(f"~Tag{'':<11} | Hash{'':<{hash_w - 4}} | Time       | Bump Version  | Commit heading")
-			for commit in self.git_lines(["log", "--merges", "--pretty=format:%H"], check=False):
-				tag = self.git_describe_exact(commit)
-				cmt_msg = self.get_commit_message(commit, overrides)
-				heading = (cmt_msg.msg.split("\n", 1)[0]).strip()
-				next_ver, effect = self.calculate_next_for_commit(cur_ver_tag, commit, merges_only=True, tag_found=tag_found,
-					overrides=overrides)
-				logger.info(
-					f"{tag:<15} | {fmt_hash(commit):<{hash_w}} | {cmt_msg.date.date()} | {next_ver:<10}{effect[:3]} | {heading}")
-
-		logger.info(f"\n# Commits since version: {cur_ver_tag} upto '{commit_hash}'")
-		logger.info(f"~Tag{'':<11} | Hash{'':<{hash_w - 4}} | Time       | Bump Version   | Commit heading")
-		commits = self.collect_commits(cur_ver_tag, commit_hash, merges_only, tag_found)
-		for commit in commits:
-			tag = self.git_describe_exact(commit)
-			cmt_msg = self.get_commit_message(commit, overrides)
-			heading = (cmt_msg.msg.split("\n", 1)[0]).strip()
-			next_ver, effect = self.calculate_next_for_commit(cur_ver_tag, commit, merges_only=False, tag_found=tag_found,
-				overrides=overrides)
-			logger.info(
-				f"{tag:<15} | {fmt_hash(commit):<{hash_w}} | {cmt_msg.date.date()} | {next_ver:<10} {effect[:3]} | {heading}")
 
 
 class SubCommandRun(SubCommand):
@@ -3748,352 +3281,6 @@ examples:
 		return run_command(args_right, cwd=bin_dir, dbg_mode=DebugMode.REPORT_ONLY).returncode
 
 
-class SubCommandPublish(SubCommand):
-	"""Subcommand handler for the 'publish' command."""
-
-	def __init__(self):
-		super().__init__("publish", ["u"])
-
-	def create_parser(self, subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
-		self.parser = subparsers.add_parser(self.command, aliases=self.aliases, add_help=False,
-			formatter_class=argparse.RawTextHelpFormatter,
-			help="Uploads files to a Sonatype Nexus repository depending on their extension.")
-		self.parser.epilog = f"""
-examples:
-
-  Upload packages to Nexus:
-    {self.script} {self.command} bin/pkg/*.deb bin/pkg/*.zip
-    {self.script} u -a staging -s dist/staging bin/pkg/*.deb
-  File starting with '-':
-    {self.script} {self.command} -- -help-file.zip
-  Using internal globbing:
-    {self.script} {self.command} "bin/pkg/*.deb"
-  Upload files to exchange directory:
-    {self.script} {self.command} -x "gitlab-ci/shared/devops/pipeline/123" bin/gcov/report.*
-  Download files from exchange directory:
-    {self.script} {self.command} -x "gitlab-ci/shared/devops/pipeline/123" -l bin/gcov report.xml report.txt
-  Dry-run upload:
-    {self.script} {self.command} -d bin/pkg/*.deb
-
-  Template ini-file for '.nexus-credentials.ini':
-
-[nexus-credentials]
-NEXUS_USER=your-username
-NEXUS_PASSWORD=your-password
-NEXUS_SERVER_URL=https://nexus.example.com
-NEXUS_RAW_REPO=shared
-NEXUS_EXCHANGE_REPO=exchange
-
-[nexus-develop]
-__inherit__=nexus-credentials
-NEXUS_APT_REPO=develop
-NEXUS_RAW_SUBDIR=dist/develop
-NEXUS_WINGET_REFRESH=winget/develop/admin/refresh
-
-[nexus-staging]
-__inherit__=nexus-credentials
-NEXUS_APT_REPO=staging
-NEXUS_RAW_SUBDIR=dist/staging
-NEXUS_WINGET_REFRESH=winget/staging/admin/refresh
-
-[nexus-stable]
-__inherit__=nexus-credentials
-NEXUS_APT_REPO=stable
-NEXUS_RAW_SUBDIR=dist/stable
-NEXUS_WINGET_REFRESH=winget/stable/admin/refresh
-"""
-		if self.parser is None:
-			raise ValueError("Parser cannot be None")
-		return self.parser
-
-	def options(self, parser: argparse.ArgumentParser):
-		"""Adds options to the given parser for the publish command."""
-		super().options(parser)
-		parser.add_argument("-e", "--exch-repo", type=str, metavar="<repo>",
-			help="Sets or overrules variable 'NEXUS_EXCHANGE_REPO' as the exchange-repository.")
-		parser.add_argument("-a", "--apt-repo", type=str, metavar="<repo>",
-			help="Sets or overrules variable 'NEXUS_APT_REPO' as the apt-repository name.")
-		parser.add_argument("-r", "--raw-repo", type=str, metavar="<repo>",
-			help="Sets or overrules variable 'NEXUS_RAW_REPO' as the raw-repository name.")
-		parser.add_argument("-s", "--raw-sub", type=str, metavar="<subdir>",
-			help="Sets or overrules variable 'NEXUS_RAW_SUBDIR' as the subdirectory.")
-		parser.add_argument("-S", "--section", type=str, default="develop", metavar="<section>",
-			help="Sets the configuration section name (default: 'develop').")
-		parser.add_argument("--server-url", type=str, metavar="<url>",
-			help="Sets or overrules variable 'NEXUS_SERVER_URL'.")
-		parser.add_argument("--user", type=str, metavar="<user>",
-			help="Sets or overrules variable 'NEXUS_USER'.")
-		parser.add_argument("--password", type=str, metavar="<password>",
-			help="Sets or overrules variable 'NEXUS_PASSWORD'.")
-		parser.add_argument("-V", "--verbose", action="store_true",
-			help="Enables verbose output for upload requests.")
-		parser.add_argument("-x", "--exchange", type=str, metavar="<exchange-dir>",
-			help="Sets the exchange sub-directory in the repository up- and download (--local).")
-		parser.add_argument("-l", "--local", type=str, metavar="<local-dir>",
-			help="Sets the exchange local-directory in the exchange repository (only with --exchange).")
-		parser.add_argument("files", nargs="*", metavar="<file>",
-			help="Files to upload to Nexus repository (use '--' before filenames starting with '-').")
-		return parser
-
-	def handle(self, args: argparse.Namespace, args_left: List[str], args_right: List[str] | None) -> int:
-		"""
-		Handles the 'publish' command execution.
-		:return: Exit code.
-		"""
-		super().handle(args, args_left, args_right)
-		# Check for impossible use of standalone argument '--local'.
-		if args.local and not args.exchange:
-			raise RuntimeError("Option '--local' requires '--exchange' to be specified!")
-		# Combine files parsed as positional arguments and arguments after '--'
-		raw_files: List[str] = (args.files or []) + (args_right or [])
-		# Check if files were passed when uploading (not downloading via --local).
-		if not args.local and not raw_files:
-			logger.error("! No files to upload!")
-			self.print_help()
-			return 1
-		# Get the config section name and check its existence.
-		section_name: str = "nexus-" + args.section
-		if not CONFIG.has_section(section_name):
-			logger.info(f"# No Nexus configuration: {section_name}")
-		# The section is allowed not to exist and do not fail.
-		merged = get_merged_config_section(section_name, fail=False)
-		# Resolve all variables with precedence: CLI arg -> Environment (RUN_ENV) -> INI Config
-		nexus_user: str = args.user or RUN_ENV.get("NEXUS_USER") or merged.get("NEXUS_USER") or ""
-		nexus_password: str = args.password or RUN_ENV.get("NEXUS_PASSWORD") or merged.get("NEXUS_PASSWORD") or ""
-		nexus_server_url: str = args.server_url or RUN_ENV.get("NEXUS_SERVER_URL") or merged.get("NEXUS_SERVER_URL") or ""
-		nexus_exchange_repo: str = args.exch_repo or RUN_ENV.get("NEXUS_EXCHANGE_REPO") or merged.get(
-			"NEXUS_EXCHANGE_REPO") or ""
-		nexus_apt_repo: str = args.apt_repo or RUN_ENV.get("NEXUS_APT_REPO") or merged.get("NEXUS_APT_REPO") or ""
-		nexus_raw_repo: str = args.raw_repo or RUN_ENV.get("NEXUS_RAW_REPO") or merged.get("NEXUS_RAW_REPO") or ""
-		nexus_raw_subdir: str = args.raw_sub or RUN_ENV.get("NEXUS_RAW_SUBDIR") or merged.get("NEXUS_RAW_SUBDIR") or ""
-		nexus_winget_refresh: str = args.raw_sub or RUN_ENV.get("NEXUS_WINGET_REFRESH") or merged.get(
-			"NEXUS_WINGET_REFRESH") or ""
-		# Report when overruled by command line arguments.
-		if args.verbose:
-			if args.raw_repo:
-				logger.info(f"# RAW repository set to '{nexus_raw_repo}'.")
-			if args.raw_sub:
-				logger.info(f"# RAW subdirectory set to '{nexus_raw_subdir}'.")
-			if args.apt_repo:
-				logger.info(f"# APT repository set to '{nexus_apt_repo}'.")
-			if args.exch_repo:
-				logger.info(f"# EXCHANGE repository set to '{nexus_exchange_repo}'.")
-			if args.exchange:
-				logger.info(f"# Exchange directory set to '{args.exchange}'.")
-			if args.local:
-				logger.info(f"# Local directory set to '{args.local}'.")
-		# Check existence of required variables.
-		cred_vars = {
-			"NEXUS_USER": nexus_user,
-			"NEXUS_PASSWORD": nexus_password,
-			"NEXUS_SERVER_URL": nexus_server_url,
-		}
-		if args.exchange:
-			# Only required if uploading or downloading from exchange repo.
-			cred_vars |= {
-				"NEXUS_EXCHANGE_REPO": nexus_exchange_repo,
-			}
-		else:
-			# Only required if uploading to at or raw repo.
-			cred_vars |= {
-				"NEXUS_APT_REPO": nexus_apt_repo,
-				"NEXUS_RAW_REPO": nexus_raw_repo,
-				"NEXUS_RAW_SUBDIR": nexus_raw_subdir,
-				"NEXUS_WINGET_REFRESH": nexus_winget_refresh,
-			}
-		# Check on the presence of required variables.
-		flag_var = False
-		# Flag indicating the Winget definition cache on the Nexus server needs to be refreshed.
-		flag_cache_refresh = False
-		for var_name, var_val in cred_vars.items():
-			if not var_val:
-				logger.error(
-					f"! Required credentials/config variable '{var_name}' "
-					f"is not set by credentials file or by parent environment!")
-				flag_var = True
-		if flag_var:
-			self.print_help()
-			return 1
-		# Handle Exchange Download: --exchange and --local
-		if args.exchange and args.local:
-			exchange_sub = str(args.exchange).strip('/\\').replace('\\', '/')
-			if DEBUG_FLAG:
-				if raw_files:
-					for pattern in raw_files:
-						fn = Path(pattern).name
-						dest_file = os.path.join(args.local, fn)
-						logger.info(
-							f"~ Not downloading: GET {str(nexus_server_url).rstrip('/')}/repository/"
-							f"{quote(str(nexus_exchange_repo), safe='')}/{exchange_sub}/{fn} -> {dest_file}"
-						)
-				else:
-					logger.info(f"~ Not downloading all files from exchange '{exchange_sub}' to '{args.local}'")
-				return 0
-			#
-			search_base_url = (
-				f"{str(nexus_server_url).rstrip('/')}/service/rest/v1/search"
-				f"?repository={quote(str(nexus_exchange_repo), safe='')}"
-				f"&group={quote('/' + exchange_sub, safe='/')}"
-			)
-			token = None
-			assets: List[Dict[str, Any]] = []
-			while True:
-				token_url = search_base_url if not token else f"{search_base_url}&continuationToken={token or ""}"
-				status, data = query_nexus_search(token_url, nexus_user, nexus_password, verbose=args.verbose)
-				if status < 200 or status >= 300 or not isinstance(data, dict):
-					logger.error(f"! Search failed ({status}) on repository '{nexus_exchange_repo}' group '{exchange_sub}'")
-					if isinstance(data, str) and data:
-						logger.error(data)
-					return 1
-				for item in data.get("items", []):
-					for asset in item.get("assets", []):
-						assets.append(asset)
-				token = data.get("continuationToken")
-				if not token:
-					break
-
-			req_base_names = {Path(f).name for f in raw_files} if raw_files else set()
-			if req_base_names:
-				for asset in assets:
-					asset_path = asset.get("path", "")
-					fn = Path(asset_path).name
-					# if req_base_names and fn not in req_base_names:
-					# 	continue
-					if any(fnmatch.fnmatch(fn, pat) or fnmatch.fnmatch(asset_path, pat) for pat in req_base_names):
-						logger.info(f"- Matching file: {fn}")
-					else:
-						continue
-					download_url = asset.get("downloadUrl", "")
-					if not download_url:
-						continue
-					dest_file = os.path.join(args.local, fn)
-					logger.info(f"- Downloading file: {asset_path} -> {dest_file}")
-					status, err = download_file_http(download_url, dest_file, nexus_user, nexus_password, verbose=args.verbose)
-					if status < 200 or status >= 300:
-						logger.error(f"! Download failed ({status}) from '{download_url}' to '{dest_file}'")
-						if err:
-							logger.error(err)
-						return 1
-			return 0
-
-		# Handle Exchange Upload: --exchange without --local
-		if args.exchange:
-			expanded_files: List[str] = []
-			for pattern in raw_files:
-				matches = glob.glob(pattern)
-				if matches:
-					expanded_files.extend(matches)
-				else:
-					expanded_files.append(pattern)
-			for upload_file in expanded_files:
-				if not os.path.isfile(upload_file):
-					if args.verbose:
-						logger.info(f"~ File(s) not found for: {upload_file}")
-					continue
-				exchange_sub = str(args.exchange).strip('/\\').replace('\\', '/')
-				exchange_parts = [quote(part, safe="") for part in exchange_sub.split('/') if part]
-				exchange_parts.append(quote(Path(upload_file).name, safe=""))
-				exchange_target = "/".join(exchange_parts)
-				upload_url = (
-					f"{str(nexus_server_url).rstrip('/')}/repository/"
-					f"{quote(str(nexus_exchange_repo), safe='')}/{exchange_target}"
-				)
-				logger.info(f"- Uploading EXCHANGE repo file: {upload_file}")
-				try:
-					response_code, output = upload_file_http(upload_url, upload_file, nexus_user, nexus_password,
-						method="PUT", verbose=args.verbose)
-				except (OSError, ValueError, http.client.HTTPException) as ex:
-					logger.error(f"! Upload failed for file '{upload_file}': {ex}")
-					return 1
-				if response_code < 200 or response_code >= 300:
-					logger.error(f"! Upload EXCHANGE package failed ({response_code}) of file: {upload_file}")
-					if output:
-						logger.error(output)
-					return 1
-			return 0
-
-		# Handle Regular Publish (neither --exchange nor --local)
-		expanded_files: List[str] = []
-		for pattern in raw_files:
-			matches = glob.glob(pattern)
-			if matches:
-				expanded_files.extend(matches)
-			else:
-				expanded_files.append(pattern)
-
-		# Iterate over all files
-		for upload_file in expanded_files:
-			if not os.path.isfile(upload_file):
-				if args.verbose:
-					logger.info(f"~ File(s) not found with: {upload_file}")
-				continue
-
-			ext = upload_file.rsplit('.', 1)[-1].lower()
-			if ext not in ["deb", "zip", "zip-def", "exe", "gz", "tgz", "bz2", "xz", "7z", "yaml", "yml", "appimage"]:
-				logger.warning(f"! No upload method for extension '{ext}' file: {upload_file}")
-				continue
-			try:
-				if ext == "deb":
-					logger.info(f"- Uploading APT repo file: {upload_file} ({self.get_readable_file_size(upload_file)})")
-					upload_url = (
-						f"{str(nexus_server_url).rstrip('/')}/service/rest/v1/components"
-						f"?repository={quote(str(nexus_apt_repo), safe='')}"
-					)
-					response_code, output = upload_file_http(upload_url, upload_file, nexus_user, nexus_password,
-						method="POST", multipart_field="apt.asset",
-						content_type="application/vnd.debian.binary-package", verbose=args.verbose)
-					upload_kind = "APT package"
-				else:
-					# Trigger a cache refresh for a winget package.
-					if ext == "zip-def":
-						flag_cache_refresh = True
-					logger.info(f"~ Uploading RAW repo file: {upload_file} ({self.get_readable_file_size(upload_file)})")
-					raw_sub = str(nexus_raw_subdir).strip('/\\').replace('\\', '/')
-					raw_parts = [quote(part, safe="") for part in raw_sub.split('/') if part]
-					raw_parts.append(quote(Path(upload_file).name, safe=""))
-					raw_target = "/".join(raw_parts)
-					upload_url = (
-						f"{str(nexus_server_url).rstrip('/')}/repository/"
-						f"{quote(str(nexus_raw_repo), safe='')}/{raw_target}"
-					)
-					response_code, output = upload_file_http(upload_url, upload_file, nexus_user, nexus_password,
-						verbose=args.verbose)
-					upload_kind = "RAW package"
-			except (OSError, ValueError, http.client.HTTPException) as ex:
-				logger.error(f"! Upload failed for file '{upload_file}': {ex}")
-				return 1
-			if response_code < 200 or response_code >= 300:
-				logger.error(f"! Upload {upload_kind} failed ({response_code}) of file: {upload_file}")
-				if output:
-					logger.error(output)
-				return 1
-		# Check if the Wingewt cache is needed to be refreshed.
-		if flag_cache_refresh:
-			logger.info(f"~ Refreshing Winget definition cache.")
-			refresh_url = f"{nexus_server_url}/{nexus_winget_refresh}"
-			response_code, output = post_request_http(url=refresh_url, username=nexus_user, password=nexus_password,
-				verbose=args.verbose)
-			if response_code < 200 or response_code >= 300:
-				logger.error(f"! Refreshing Winget definition cache failed ({response_code})")
-				if output:
-					logger.error(output)
-				return 1
-		return 0
-
-	@staticmethod
-	def get_readable_file_size(filepath):
-		"""Returns a human-readable file size."""
-		try:
-			size_bytes = os.path.getsize(filepath)
-		except FileNotFoundError:
-			return "File not found"
-		for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti']:
-			precision: int = 2 if len(unit) != 0 else 0
-			if size_bytes < 1024.0:
-				return f"{size_bytes:.{precision}f} {unit}B"
-			size_bytes /= 1024.0
-
-
 def split_arguments(arguments: List[str], split_arg: str = "--") -> tuple[List[str], List[str]]:
 	"""
 	Splits the arguments in a left and right
@@ -4182,9 +3369,7 @@ def main() -> int:
 			SubCommandDocker().register()
 	# Register unconditional commands.
 	SubCommandInstall().register()
-	SubCommandVersion().register()
 	SubCommandRun().register()
-	SubCommandPublish().register()
 	# Dynamically import and register subcommand modules named 'build-*.py'.
 	_load_subcommand_modules()
 	#
@@ -4236,7 +3421,7 @@ To Build and test the example project:
 		parser.print_help()
 		return 0
 	# When the first argument is not a subcommand insert the standard command.
-	if len(arguments) and arguments[0] not in parser._actions[0].choices:
+	if len(arguments) and not arguments[0] in parser._actions[0].choices:
 		arguments = [std_cmd.command] + arguments
 	# When only the command is given show its help.
 	if len(arguments) == 1:

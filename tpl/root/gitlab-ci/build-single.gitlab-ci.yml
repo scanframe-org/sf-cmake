@@ -54,6 +54,8 @@ stages:
 
 # Defaults for all jobs.
 default:
+  # Set a time limit for all jobs here.
+  timeout: 2h
   # Set a specific Docker image to execute all jobs in.
   image: "${SF_DOCKER_IMAGE}"
   # Tags determine the selection of a runner.
@@ -105,10 +107,16 @@ job-build:
 
 # Template for all 'deploy' jobs.
 .deploy:
+  variables:
+    # Only need the last commit for the build.py script.
+    GIT_DEPTH: 1
+  before_script:
+    # Show the working directory and environment variables for debugging.
+    - 'echo "Working Directory=$(pwd)" && echo "Environment Dump" && printenv | sort'
   script:
     # Upload all generated packages to Nexus depending on their extension to a specific destination.
     - >-
-      ./build.py publish
+      ./build.py --verbose publish
       "${SF_DIR_PKG}/*.deb"
       "${SF_DIR_PKG}/*.exe"
       "${SF_DIR_PKG}/*.zip"
