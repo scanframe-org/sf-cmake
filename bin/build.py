@@ -2749,7 +2749,7 @@ Choices are depended on the host platform:
 				logger.info("# Installing MSVC 2022 x86_64 compatible with the Qt library.")
 				# Download a Python file for downloading the MSVC.
 				py_file = get_file_from_url(
-					url="https://raw.githubusercontent.com/Scanframe/sf-cygwin-bin/refs/heads/master/portable-msvc.py",
+					url="https://raw.githubusercontent.com/scanframe-org/sf-cygwin-bin/refs/heads/master/portable-msvc.py",
 					suffix=".py")
 				if run_command([sys.executable, py_file, "--vs", "2022", "--target", "x64", "--accept-license"],
 					cwd=install_dir, dbg_mode=DebugMode.REPORT_ONLY).returncode != 0:
@@ -2813,9 +2813,9 @@ Choices are depended on the host platform:
 			if ask_selection(options={True: "Yes", False: "No"}, title="Project Helper Repository",
 				caption=f"Add submodule project helper in '{'/'.join(CMAKE_LIB_SUBDIR)}'?"):
 				clone_options = {
-					"main@https://github.com/Scanframe/sf-cmake.git": "GitHub Scanframe 'sf-cmake.git'",
+					"main@https://github.com/scanframe-org/sf-cmake.git": "GitHub Scanframe 'sf-cmake.git'",
 					"main@https://git.scanframe.com/library/cmake-lib.git": "GitLab Scanframe 'cmake-lib.git'",
-					"dev-hotfix@https://github.com/Scanframe/sf-cmake.git": "GitHub Scanframe 'sf-cmake.git' (hotfix)",
+					"dev-hotfix@https://github.com/scanframe-org/sf-cmake.git": "GitHub Scanframe 'sf-cmake.git' (hotfix)",
 					"dev-hotfix@https://git.scanframe.com/library/cmake-lib.git": "GitLab Scanframe 'cmake-lib.git' (hotfix)"
 				}
 				# Only add these options when '__DEV' is set.

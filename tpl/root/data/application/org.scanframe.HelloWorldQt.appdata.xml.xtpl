@@ -22,7 +22,7 @@ Validate this file using: appstreamcli validate &#45;&#45;pedantic <xml-file>
 	</description>
 
 	<launchable type="desktop-id">org.scanframe.HelloWorldQt.desktop</launchable>
-	<url type="homepage">https://github.com/Scanframe/sf-cmake</url>
+	<url type="homepage">https://github.com/scanframe-org/sf-cmake</url>
 	<provides>
 		<binary>hello-world-qt</binary>
 		<binary>hello-world</binary>

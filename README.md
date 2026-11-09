@@ -105,7 +105,7 @@ Sources where to download from are:
 
 - [Latest from Development server](https://www.scanframe.com/export/build.py)
 - [Scanframe's GitLab server 'main' branch](https://git.scanframe.com/library/cmake-lib/-/raw/main/bin/build.py)
-- [GitHub mirror from GitLab 'main' branch](https://raw.githubusercontent.com/Scanframe/sf-cmake/refs/heads/main/bin/build.py)
+- [GitHub mirror from GitLab 'main' branch](https://raw.githubusercontent.com/scanframe-org/sf-cmake/refs/heads/main/bin/build.py)
 
 For Linux/Debian use `wget <url>` and for Windows, which has Curl installed by default, use `curl -O <url>`.
 

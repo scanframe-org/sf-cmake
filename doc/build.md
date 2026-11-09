@@ -211,7 +211,7 @@ SF_EXEC_DIR_SUFFIX=-msvc ./build.py run -p msvc-debug -- hello-world.exe
 > Due to a MinGW v13 bug, it cannot be run from a shared drive since it converts its
 > install-directory to a UNC path which breaks the compiler.
 > _(A workaround is using a slower SSHFS share instead of Samba and
-> requires [Cygwin](https://github.com/Scanframe/sf-cygwin-bin "Easy install Cygwin repo.").)_
+> requires [Cygwin](https://github.com/scanframe-org/sf-cygwin-bin "Easy install Cygwin repo.").)_
 
 #### MSVC (msvc) x86_64
 
@@ -220,7 +220,7 @@ SF_EXEC_DIR_SUFFIX=-msvc ./build.py run -p msvc-debug -- hello-world.exe
 - **Use Case**: Windows development with Visual Studio toolchain.
 - **Configuration**: `env.msvc@`, `env.msvc.wine@`, `env.msvc.wine.docker@` in `build.ini`.
 
-> This standalone script [`portable-msvc.py`](https://github.com/Scanframe/sf-cygwin-bin/blob/master/portable-msvc.py)
+> This standalone script [`portable-msvc.py`](https://github.com/scanframe-org/sf-cygwin-bin/blob/master/portable-msvc.py)
 > installs the 'Microsoft Visual C++ Compiler' using the CLI only in a portable way.
 
 ## Configuration File (build.ini)
