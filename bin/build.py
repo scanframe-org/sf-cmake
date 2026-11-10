@@ -982,47 +982,6 @@ def download_file_http(url: str, dest_file: str, username: str, password: str,
 		connection.close()
 
 
-def query_nexus_search(url: str, username: str, password: str, verbose: bool = False) -> tuple[int, Any]:
-	"""Performs an HTTP GET request to Nexus search API and returns parsed JSON data."""
-	parsed_url = urlsplit(url)
-	if parsed_url.scheme not in ["http", "https"] or not parsed_url.hostname:
-		raise ValueError(f"Unsupported or invalid search URL: {url}")
-	request_target = parsed_url.path or "/"
-	if parsed_url.query:
-		request_target += f"?{parsed_url.query}"
-	headers = {
-		"Authorization": "Basic " + base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii"),
-		"Accept": "application/json",
-	}
-	if DEBUG_FLAG:
-		logger.info(f"~ Not querying: GET {url}")
-		return 200, {"items": []}
-	if verbose:
-		logger.info(f"~ Querying: GET {url}")
-	connection_class = http.client.HTTPSConnection if parsed_url.scheme == "https" else http.client.HTTPConnection
-	connection_args: Dict[str, Any] = {}
-	if parsed_url.scheme == "https":
-		connection_args["context"] = ssl.create_default_context()
-	# noinspection bad-argument-type
-	connection = connection_class(parsed_url.hostname, parsed_url.port, **connection_args)
-	try:
-		connection.request("GET", request_target, headers=headers)
-		response = connection.getresponse()
-		response_body = response.read().decode("utf-8", errors="replace")
-		if verbose:
-			logger.info(f"~ Nexus response: HTTP {response.status} {response.reason}")
-		if response.status < 200 or response.status >= 300:
-			return response.status, response_body
-		try:
-			data = json.loads(response_body)
-			return response.status, data
-		except json.JSONDecodeError as ex:
-			logger.error(f"! Failed to parse JSON response: {ex}")
-			return response.status, response_body
-	finally:
-		connection.close()
-
-
 def remove_tree(dir_name: Path) -> None:
 	"""
 	Remove the complete passed directory tree, even when some files are read-only.

@@ -475,7 +475,7 @@ which is also the Debian revision package number (use `0` for the first version)
 ./build.py --package gnu-debug -- -DSF_PACKAGE_QT=0
 ```
 
-> The same name is also used for non debian package generators.
+> The same name is also used for non Debian package generators.
 
 ### Debian Package Versioning Specification
 

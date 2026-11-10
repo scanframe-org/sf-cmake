@@ -16,7 +16,7 @@ import fnmatch
 import http.client
 from typing import List, Dict, Any
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 # Use the already-loaded 'build' module from sys.modules to avoid re-importing
 # the module-level code (which would create a second config and separate registry).
@@ -103,7 +103,8 @@ NEXUS_WINGET_REFRESH=winget/stable/admin/refresh
 			help="Sets or overrules variable 'NEXUS_RAW_REPO' as the raw-repository name.")
 		parser.add_argument("-s", "--raw-sub", type=str, metavar="<subdir>",
 			help="Sets or overrules variable 'NEXUS_RAW_SUBDIR' as the subdirectory.")
-		parser.add_argument("-S", "--section", type=str, default="develop", metavar="<section>",
+		parser.add_argument("-S", "--section", type=str, default="develop",
+			metavar="<section>", choices=["develop", "staging", "stable"],
 			help="Sets the configuration section name (default: 'develop').")
 		parser.add_argument("--server-url", type=str, metavar="<url>",
 			help="Sets or overrules variable 'NEXUS_SERVER_URL'.")
@@ -224,7 +225,7 @@ NEXUS_WINGET_REFRESH=winget/stable/admin/refresh
 			assets: List[Dict[str, Any]] = []
 			while True:
 				token_url = search_base_url if not token else f"{search_base_url}&continuationToken={token or ""}"
-				status, data = main.query_nexus_search(token_url, nexus_user, nexus_password, verbose=args.verbose)
+				status, data = self.query_nexus_search(token_url, nexus_user, nexus_password, verbose=args.verbose)
 				if status < 200 or status >= 300 or not isinstance(data, dict):
 					main.logger.error(f"! Search failed ({status}) on repository '{nexus_exchange_repo}' group '{exchange_sub}'")
 					if isinstance(data, str) and data:
@@ -367,6 +368,47 @@ NEXUS_WINGET_REFRESH=winget/stable/admin/refresh
 			else:
 				main.logger.error(f": Not refreshing Winget definition cache due to an empty URL.")
 		return 0
+
+	@staticmethod
+	def query_nexus_search(url: str, username: str, password: str, verbose: bool = False) -> tuple[int, Any]:
+		"""Performs an HTTP GET request to Nexus search API and returns parsed JSON data."""
+		parsed_url = urlsplit(url)
+		if parsed_url.scheme not in ["http", "https"] or not parsed_url.hostname:
+			raise ValueError(f"Unsupported or invalid search URL: {url}")
+		request_target = parsed_url.path or "/"
+		if parsed_url.query:
+			request_target += f"?{parsed_url.query}"
+		headers = {
+			"Authorization": "Basic " + main.base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii"),
+			"Accept": "application/json",
+		}
+		if main.DEBUG_FLAG:
+			main.logger.info(f"~ Not querying: GET {url}")
+			return 200, {"items": []}
+		if verbose:
+			main.logger.info(f"~ Querying: GET {url}")
+		connection_class = http.client.HTTPSConnection if parsed_url.scheme == "https" else http.client.HTTPConnection
+		connection_args: Dict[str, Any] = {}
+		if parsed_url.scheme == "https":
+			connection_args["context"] = main.ssl.create_default_context()
+		# noinspection bad-argument-type
+		connection = connection_class(parsed_url.hostname, parsed_url.port, **connection_args)
+		try:
+			connection.request("GET", request_target, headers=headers)
+			response = connection.getresponse()
+			response_body = response.read().decode("utf-8", errors="replace")
+			if verbose:
+				main.logger.info(f"~ Nexus response: HTTP {response.status} {response.reason}")
+			if response.status < 200 or response.status >= 300:
+				return response.status, response_body
+			try:
+				data = main.json.loads(response_body)
+				return response.status, data
+			except main.json.JSONDecodeError as ex:
+				main.logger.error(f"! Failed to parse JSON response: {ex}")
+				return response.status, response_body
+		finally:
+			connection.close()
 
 	@staticmethod
 	def get_readable_file_size(filepath):
