@@ -375,7 +375,6 @@ def start_git_server(port: int) -> int:
 				text=False
 			)
 			# Prepare the response using hex encoding prevents JSON breakages.
-			# noinspection PyUnresolvedReferences
 			response = {"exit_code": proc.returncode, "stdout": proc.stdout.hex(), "stderr": proc.stderr.hex()}
 			conn.sendall(json.dumps(response).encode('utf-8'))
 		finally:
@@ -402,7 +401,9 @@ def start_git_server(port: int) -> int:
 			counter += 1
 			# When tried too many ports, bailout with an error.
 			if counter > 20:
-				return 0
+				msg = f"Git Proxy, failed to open a port in range '{port}..{port + counter}'."
+				logger.error(f"! {msg}")
+				raise RuntimeError(msg)
 	server.listen(10)
 	logger.info(f"= Git Proxy Listener started on port '{port + counter}'.")
 	# Launch the main server loop in its own thread
