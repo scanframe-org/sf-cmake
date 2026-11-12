@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>App Launcher</title>
+</head>
+<body>
+<h1>Launch App Window</h1>
+<button onclick="openAppWindow()">Open App Window</button>
+
+<script>
+	function openAppWindow() {
+		const url = 'html/index.html'; // Change this to your URL
+		const windowFeatures = 'toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=1280,height=800';
+
+		window.open(url, '_blank', windowFeatures);
+	}
+
+	// Auto-launch on page load (optional)
+	openAppWindow();
+</script>
+</body>
+</html>

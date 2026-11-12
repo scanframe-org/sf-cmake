@@ -7,8 +7,10 @@ set -o pipefail
 
 # Get the script directory.
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Get the actual directory of the script where include files are residing.
+include_dir="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 # Include WriteLog function.
-source "${script_dir}/inc/Miscellaneous.sh"
+source "${include_dir}/inc/Miscellaneous.sh"
 
 ## Trap script exit with function.
 trap 'ScriptExit "${BASH_SOURCE}" "${BASH_LINENO}" "${BASH_COMMAND}"' EXIT

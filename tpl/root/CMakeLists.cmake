@@ -42,7 +42,6 @@ if (WIN32 AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
 endif ()
 
 # Make sure builds do not wind up in the source directory.
-find_package(SfMacros CONFIG REQUIRED)
 find_package(SfBuildCheck CONFIG REQUIRED)
 if (SF_BUILD_QT)
 	# Get the Qt version from the 'build.ini' file.

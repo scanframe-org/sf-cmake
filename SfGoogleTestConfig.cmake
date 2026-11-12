@@ -1,5 +1,7 @@
 # FetchContent added in CMake 3.11, downloads during the configure step
 include(FetchContent)
+# Set the folder for the IDE.
+set(CMAKE_FOLDER "Lib/GoogleTest")
 
 # Import GoogleTest library for testing.
 #[[
@@ -23,6 +25,8 @@ set(BUILD_GMOCK OFF)
 set(INSTALL_GTEST OFF)
 # Adds 'gtest' library and 'gmock' library when it is enabled.
 FetchContent_MakeAvailable("GoogleTest-${SfGoogleTest_VERSION}")
+# Unset the folder for the IDE.
+unset(CMAKE_FOLDER)
 
 ### Lines to add to a project using this library.
 #[[

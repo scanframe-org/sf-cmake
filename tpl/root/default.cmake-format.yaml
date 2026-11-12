@@ -1,0 +1,135 @@
+# Options affecting listfile parsing.
+parse:
+  # Specify structure for custom cmake functions.
+  additional_commands: {}
+  # Override configurations per-command where available.
+  override_spec: {}
+  # Specify variable tags.
+  vartags: []
+  # Specify property tags.
+  proptags: []
+
+# Options affecting formatting.
+format:
+  # Disable formatting entirely, making cmake-format a no-op.
+  disable: false
+  # Maximum line width for formatted CMake files.
+  line_width: 120
+  # Number of spaces per indentation level.
+  tab_size: 2
+  # Use tab characters instead of spaces for indentation.
+  use_tabchars: true
+  # Policy for fractional tab characters: use spaces instead of partial tabs.
+  fractional_tab_policy: use-space
+  # Maximum number of subgroups before horizontal wrapping.
+  max_subgroups_hwrap: 12
+  # Maximum number of positional arguments before horizontal wrapping.
+  max_pargs_hwrap: 6
+  # Maximum number of lines for a cmdline positional group before nesting.
+  max_rows_cmdline: 2
+  # Separate flow control keywords (if, foreach, while) from their parentheses with a space.
+  separate_ctrl_name_with_space: true
+  # Do not separate function names from their parentheses.
+  separate_fn_name_with_space: false
+  # Put the closing parenthesis on its own line.
+  dangle_parens: true
+  # Align dangling closing parentheses with the command prefix.
+  dangle_align: prefix
+  # Minimum statement spelling length to force reject nested layouts.
+  min_prefix_chars: 4
+  # Maximum length of prefix characters for alignment.
+  max_prefix_chars: 0
+  # Maximum number of lines for horizontal wrapping before rejecting the layout.
+  max_lines_hwrap: 2
+  # Use Unix-style line endings (LF).
+  line_ending: unix
+  # Leave CMake command case unchanged.
+  command_case: unchanged
+  # Leave CMake keyword case unchanged.
+  keyword_case: unchanged
+  # List of command names which should always be wrapped.
+  always_wrap: []
+  # Enable lexicographic sorting of argument lists known to be sortable.
+  enable_sort: true
+  # Allow parser to infer whether an argument list is sortable without annotation.
+  autosort: false
+  # Require valid layout and exit with error if line width cannot be achieved.
+  require_valid_layout: false
+  # Dictionary mapping layout nodes to a list of wrap decisions.
+  layout_passes: {}
+
+# Options affecting comment reflow and formatting.
+markup:
+  # Character to use for bulleted lists.
+  bullet_char: "*"
+  # Character to use as punctuation after numerals in an enumerated list.
+  enum_char: "."
+  # Preserve the first comment block in each file without reflowing.
+  first_comment_is_literal: false
+  # Regular expression pattern to match comments that should not be reflowed.
+  literal_comment_pattern: null
+  # Regular expression to match preformat fences in comments.
+  fence_pattern: ^\s*([`~]{3}[`~]*)(.*)$
+  # Regular expression to match rulers in comments.
+  ruler_pattern: ^\s*[^\w\s]{3}.*[^\w\s]{3}$
+  # Pattern to explicitly mark a comment as trailing for the preceding argument.
+  explicit_trailing_pattern: "#<"
+  # Minimum number of hash characters to preserve in a hash ruler.
+  hashruler_min_length: 10
+  # Normalize hash rulers by inserting a space and filling the column.
+  canonicalize_hashrulers: true
+  # Disable comment markup processing to preserve comments as-is.
+  enable_markup: false
+
+# Options affecting the linter.
+lint:
+  # List of lint codes to disable.
+  disabled_codes: []
+  # Regular expression pattern for valid function names.
+  function_pattern: "[0-9a-z_]+"
+  # Regular expression pattern for valid macro names.
+  macro_pattern: "[0-9A-Z_]+"
+  # Regular expression pattern for variables with global (cache) scope.
+  global_var_pattern: "[A-Z][0-9A-Z_]+"
+  # Regular expression pattern for variables with global scope but internal semantic.
+  internal_var_pattern: _[A-Z][0-9A-Z_]+
+  # Regular expression pattern for variables with local scope.
+  local_var_pattern: "[a-z][a-z0-9_]+"
+  # Regular expression pattern for private directory variables.
+  private_var_pattern: _[0-9a-z_]+
+  # Regular expression pattern for public directory variables.
+  public_var_pattern: "[A-Z][0-9A-Z_]+"
+  # Regular expression pattern for function/macro arguments and loop variables.
+  argument_var_pattern: "[a-z][a-z0-9_]+"
+  # Regular expression pattern for keywords used in functions or macros.
+  keyword_pattern: "[A-Z][0-9A-Z_]+"
+  # Maximum conditionals in a loop before considering it a custom parser.
+  max_conditionals_custom_parser: 2
+  # Minimum number of newlines between statements.
+  min_statement_spacing: 1
+  # Maximum number of newlines between statements.
+  max_statement_spacing: 2
+  # Maximum number of return statements in a function.
+  max_returns: 6
+  # Maximum number of branches in a function.
+  max_branches: 12
+  # Maximum number of arguments in a function.
+  max_arguments: 5
+  # Maximum number of local variables in a function.
+  max_localvars: 15
+  # Maximum number of statements in a function.
+  max_statements: 50
+
+# Options affecting file encoding.
+encode:
+  # Emit the unicode byte-order mark (BOM) at the start of the file.
+  emit_byteorder_mark: false
+  # Specify the encoding of the input file.
+  input_encoding: utf-8
+  # Specify the encoding of the output file.
+  output_encoding: utf-8
+
+# Miscellaneous configuration options.
+misc:
+  # Dictionary containing per-command configuration overrides.
+  per_command: {}

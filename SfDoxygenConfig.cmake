@@ -19,7 +19,8 @@ function(Sf_AddDoxygenDocumentation _Target _DocBaseDir _ImageDirs _OutDir _Sour
 	Sf_GetFilenameComponent(_OutDir "${_OutDir}" REALPATH)
 	# Check if the resulting directory exists.
 	if (NOT EXISTS "${_OutDir}" OR NOT IS_DIRECTORY "${_OutDir}")
-		message(FATAL_ERROR "${CMAKE_CURRENT_FUNCTION}: Output directory '${_OutDir}' does not exist and needs to be created!")
+		file(MAKE_DIRECTORY "${_OutDir}")
+		message(NOTICE "${CMAKE_CURRENT_FUNCTION}: Output directory '${_OutDir}' does not exist and is created!")
 	endif ()
 	# Disable TLS check in windows.
 	if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
@@ -144,6 +145,8 @@ function(Sf_AddDoxygenDocumentation _Target _DocBaseDir _ImageDirs _OutDir _Sour
 	set(_FileOut "${CMAKE_CURRENT_BINARY_DIR}/doxyfile.conf")
 	# Generate the configure the file for doxygen.
 	configure_file("${_FileIn}" "${_FileOut}" @ONLY)
+	# Create launcher page which can be used from the IDE browser.
+	file(COPY "${SfDoxygen_DIR}/tpl/doxygen/open.html" DESTINATION "${_OutDir}")
 	# Note the option ALL which allows to build the docs together with the application.
 	add_custom_target("${_Target}"
 		# Remove previous resulting 'html' directory.

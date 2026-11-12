@@ -1,4 +1,4 @@
-find_package(SfQtLibraryCommon CONFIG REQUIRED)
+include(SfQtLibrary)
 
 # Download the required library when not found.
 Sf_QtLibraryDownload("${SfQtLibrary_VERSION}")

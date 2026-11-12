@@ -1,5 +1,7 @@
 # FetchContent added in CMake 3.11, downloads during the configure step
 include(FetchContent)
+# Set the folder for the IDE.
+set(CMAKE_FOLDER "Lib/JSON")
 # Import Json library.
 #[[
 FetchContent_Declare(
@@ -16,6 +18,8 @@ FetchContent_Declare(
 )
 # Adds nlohmann_json::nlohmann_json
 FetchContent_MakeAvailable("nlohmann-json-${SfJson_VERSION}")
+# Unset the folder for the IDE.
+unset(CMAKE_FOLDER)
 
 ### Lines to add to a project using this library.
 #[[

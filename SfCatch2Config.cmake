@@ -1,5 +1,7 @@
 # FetchContent added in CMake 3.11, downloads during the configure step
 include(FetchContent)
+# Set the folder for the IDE.
+set(CMAKE_FOLDER "Lib/Catch2")
 # Import Catch2 library for testing.
 #[[
 FetchContent_Declare(
@@ -16,6 +18,8 @@ FetchContent_Declare(
 )
 # Adds Catch2::Catch2
 FetchContent_MakeAvailable("Catch2-${SfCatch2_VERSION}")
+# Unset the folder for the IDE.
+unset(CMAKE_FOLDER)
 
 ### Lines to add to a project using this library.
 #[[

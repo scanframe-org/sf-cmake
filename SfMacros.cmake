@@ -1,7 +1,6 @@
 ##
-## This package cannot be used with find_package() before the first project is set.
+## This file is included by SfBase.
 ##
-find_package(SfBase CONFIG REQUIRED)
 
 ##!
 # Used as a sub-macro to macro 'Sf_AddImportLibrary'.
