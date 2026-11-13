@@ -2175,9 +2175,14 @@ examples:
 		# Add this env var since Windows/Wine cannot handle symlinks.
 		RUN_ENV["PY_SCRIPT_DIR"] = os.path.dirname(os.path.realpath(__file__))
 		# When there are arguments on the right, and the first argument does not start with a hyphen.
-		if not args.git_server and args_right and args_right[0][:1] == '-':
+		if not args.git_server and args_right:
+			native_cmd = SubCommandNative()
+			arg_idx:int = 0
+			# When the first argument is a valid native command and there are more than one.
+			if args_right[0] in native_cmd.aliases + [native_cmd.command] and len(args_right) > 1:
+				arg_idx = 1
 			# Split the arguments again on the second '--' and parse the right command arguments and show help when invalid.
-			if cmd_args := SubCommandNative().parse_args(split_arguments(args_right)[0], False):
+			if cmd_args := native_cmd.parse_args(split_arguments(args_right[arg_idx:])[0], False):
 				# Some commands demand the Git server to be present.
 				args.git_server = cmd_args.make or cmd_args.build or cmd_args.workflow
 		# Start running the git server only when needed or forced.
