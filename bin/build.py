@@ -1973,6 +1973,8 @@ examples:
 		config_preset_name: str | None = None
 		# The 'build' preset name also functioning as a flag as well.
 		build_preset_name: str | None = None
+		# Other preset name for test package or workflow.
+		preset_name: str | None = None
 		# Flag to indicate that the build step triggers the make/configure step.
 		make_by_build: bool = False
 		# Binary directory.
@@ -2124,7 +2126,7 @@ examples:
 				cmd.append("--verbose")
 		logger.info("# Build script completed successfully.")
 		# When no config preset was set nothing was processed.
-		if not config_preset_name:
+		if not config_preset_name and not build_preset_name and not preset_name:
 			logger.info("! Nothing to process.")
 			return 1
 		return 0
