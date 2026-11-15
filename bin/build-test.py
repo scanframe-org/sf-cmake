@@ -9,10 +9,10 @@ build.ini.  The command is only available at the top level — it does not
 register when running inside Docker or Wine.
 """
 
+import sys
 import argparse
 import hashlib
 import os
-import sys
 import time
 from typing import Dict, List
 from pathlib import Path

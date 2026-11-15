@@ -13,6 +13,7 @@ FetchContent_Declare(
 FetchContent_Declare(
 	"GoogleTest-${SfGoogleTest_VERSION}"
 	URL "https://github.com/google/googletest/releases/download/v${SfGoogleTest_VERSION}/googletest-${SfGoogleTest_VERSION}.tar.gz"
+	DOWNLOAD_NO_PROGRESS TRUE
 )
 # Prevent GoogleTest from overriding options like BUILD_SHARED_LIBS
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)

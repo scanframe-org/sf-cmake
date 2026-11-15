@@ -8,9 +8,9 @@ extension, supporting APT, RAW, and Exchange repositories with various
 configuration options.
 """
 
+import sys
 import argparse
 import os
-import sys
 import glob
 import fnmatch
 import http.client

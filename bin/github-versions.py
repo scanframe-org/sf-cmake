@@ -15,6 +15,8 @@ Matches the behavior of the provided bash script:
 """
 
 import sys
+
+sys.dont_write_bytecode = True
 import argparse
 import json
 import re

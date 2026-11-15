@@ -12,6 +12,7 @@ FetchContent_Declare(
 FetchContent_Declare(
 	"Catch2-${SfCatch2_VERSION}"
 	URL "https://github.com/catchorg/Catch2/archive/refs/tags/v${SfCatch2_VERSION}.tar.gz"
+	DOWNLOAD_NO_PROGRESS TRUE
 )
 # Adds Catch2::Catch2
 FetchContent_MakeAvailable("Catch2-${SfCatch2_VERSION}")

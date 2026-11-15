@@ -16,6 +16,8 @@ Example input file with multiple diagrams::
 """
 
 import sys
+
+sys.dont_write_bytecode = True
 import argparse
 import glob
 import re

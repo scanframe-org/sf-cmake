@@ -7,8 +7,8 @@ This subcommand serves as an example of how to create a subcommand module
 that is dynamically imported by the main build.py script.
 """
 
-import argparse
 import sys
+import argparse
 
 # Use the already-loaded 'build' module from sys.modules to avoid re-importing
 # the module-level code (which would create a second config and separate registry).

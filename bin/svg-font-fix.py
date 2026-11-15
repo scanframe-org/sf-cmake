@@ -5,6 +5,8 @@
 "exec" "python3" "$0" "$@"
 
 import sys
+
+sys.dont_write_bytecode = True
 import xml.etree.ElementTree as ElementTree
 import os
 import shutil
@@ -44,7 +46,8 @@ def fix_svg_for_qt(file_path):
 				text_elem.set('x', x)
 				text_elem.set('y', y)
 			else:
-				print(f"⚠️  Warning: Missing 'x' or 'y' in TextPosition for element at line {text_elem.sourceline if hasattr(text_elem, 'sourceline') else 'unknown'}")
+				print(
+					f"⚠️  Warning: Missing 'x' or 'y' in TextPosition for element at line {text_elem.sourceline if hasattr(text_elem, 'sourceline') else 'unknown'}")
 			# Create a new tspan element.
 			new_tspan = ElementTree.Element('tspan', attrib=attrs)
 			new_tspan.text = text_content

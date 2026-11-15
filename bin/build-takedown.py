@@ -7,10 +7,10 @@ This subcommand lists and optionally deletes files from a Sonatype Nexus reposit
 matching the given wildcards, supporting APT and RAW (winget) repositories.
 """
 
+import sys
 import argparse
 import base64
 import ssl
-import sys
 import fnmatch
 import re
 import http.client

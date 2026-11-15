@@ -2123,6 +2123,10 @@ examples:
 			if args.verbose:
 				cmd.append("--verbose")
 		logger.info("# Build script completed successfully.")
+		# When no config preset was set nothing was processed.
+		if not config_preset_name:
+			logger.info("! Nothing to process.")
+			return 1
 		return 0
 
 

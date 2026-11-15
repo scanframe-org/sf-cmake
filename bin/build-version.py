@@ -8,6 +8,7 @@ It analyzes merge commits since the last release tag to determine the next
 semantic version and can generate Markdown release notes.
 """
 
+import sys
 import argparse
 import os
 import re
@@ -16,7 +17,6 @@ import subprocess
 from datetime import datetime
 from dataclasses import dataclass
 from typing import List, Dict, Tuple
-import sys
 
 # Use the already-loaded 'build' module from sys.modules to avoid re-importing
 # the module-level code (which would create a second config and separate registry).

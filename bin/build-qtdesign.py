@@ -8,9 +8,9 @@ preset, resolving the Qt version directory and compiler subdirectory
 (gcc_64 / mingw_64 / msvc_64) automatically.
 """
 
-import argparse
 import sys
-from typing import List, Dict
+import argparse
+from typing import List
 
 # Use the already-loaded 'build' module from sys.modules to avoid re-importing
 # the module-level code (which would create a second config and separate registry).

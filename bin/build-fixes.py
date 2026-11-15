@@ -8,9 +8,9 @@ installs them into a Wine prefix's system32 directory, after backing up
 the original DLLs which are required as runtime dependencies.
 """
 
+import sys
 import argparse
 import os
-import sys
 import tempfile
 from typing import List
 from pathlib import Path

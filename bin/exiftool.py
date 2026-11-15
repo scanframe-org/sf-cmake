@@ -13,6 +13,8 @@ Functions:
   - main: Entry point of the script that determines the file type and extracts metadata.
 """
 import sys
+
+sys.dont_write_bytecode = True
 import os
 from elftools.elf.elffile import ELFFile
 import pefile
