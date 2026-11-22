@@ -8,11 +8,12 @@ Clones the cmake-lib repository into the cmake/lib directory at a specified tag.
 
 from __future__ import annotations
 import argparse
+import shutil
 import subprocess
 import sys
 import urllib.request
 from pathlib import Path
-from zipfile import ZipFile
+import tarfile
 
 # Default repository URL and tag
 REPO_URL = "https://github.com/scanframe-org/sf-cmake.git"
@@ -45,7 +46,7 @@ parser.add_argument(
 	"-e",
 	"--extract",
 	action="store_true",
-	help="Download a zip archive from GitHub and extract it instead of cloning.",
+	help="Download a tar.gz archive from GitHub and extract it instead of cloning.",
 )
 
 
@@ -67,7 +68,7 @@ def main() -> int:
 	if args.install:
 		return do_install(args)
 
-	# Handle --extract: download zip and extract
+	# Handle --extract: download tar.gz and extract
 	if args.extract:
 		return do_extract(args)
 
@@ -121,43 +122,43 @@ def do_clone(args: argparse.Namespace) -> int:
 	return 0
 
 
-# Download zip from GitHub and extract to target directory
+# Download tar.gz from GitHub and extract to target directory
 def do_extract(args: argparse.Namespace) -> int:
-	"""Download a zip archive from GitHub and extract it into the target directory."""
+	"""Download a tar.gz archive from GitHub and extract it into the target directory."""
 	if TARGET_DIR.exists():
 		print(f"Error: Directory '{TARGET_DIR}' already exists. Aborting.", file=sys.stderr)
 		return 1
 
-	# Build the GitHub zip URL from the repo URL and tag
+	# Build the GitHub tar.gz URL from the repo URL and tag
 	# REPO_URL is like https://github.com/scanframe-org/sf-cmake.git
-	# We need https://github.com/scanframe-org/sf-cmake/archive/refs/tags/{tag}.zip
+	# We need https://github.com/scanframe-org/sf-cmake/archive/refs/tags/{tag}.tar.gz
 	repo_url = REPO_URL.rstrip("/").rstrip(".git")
-	zip_url = f"{repo_url}/archive/refs/tags/{args.tag}.zip"
+	tar_url = f"{repo_url}/archive/refs/tags/{args.tag}.tar.gz"
 
 	# Create parent directory if needed
 	TARGET_DIR.parent.mkdir(parents=True, exist_ok=True)
 
-	# Download the zip file
-	zip_path = TARGET_DIR.parent / f"sf-cmake-{args.tag}.zip"
-	print(f"Downloading {zip_url}...")
+	# Download the tar.gz file
+	tar_path = TARGET_DIR.parent / f"sf-cmake-{args.tag}.tar.gz"
+	print(f"Downloading {tar_url}...")
 	try:
-		urllib.request.urlretrieve(zip_url, str(zip_path))
+		urllib.request.urlretrieve(tar_url, str(tar_path))
 	except urllib.error.URLError as e:
-		print(f"Error: Failed to download zip file.\n{e}", file=sys.stderr)
+		print(f"Error: Failed to download tar.gz file.\n{e}", file=sys.stderr)
 		return 1
 
-	# Extract the zip file
+	# Extract the tar.gz file
 	print(f"Extracting to {TARGET_DIR.parent}...")
 	try:
-		with ZipFile(zip_path) as zf:
-			zf.extractall(TARGET_DIR.parent)
+		with tarfile.open(tar_path, "r:gz") as tf:
+			tf.extractall(TARGET_DIR.parent)
 	except Exception as e:
-		print(f"Error: Failed to extract zip file.\n{e}", file=sys.stderr)
-		zip_path.unlink(missing_ok=True)
+		print(f"Error: Failed to extract tar.gz file.\n{e}", file=sys.stderr)
+		tar_path.unlink(missing_ok=True)
 		return 1
 
-	# Clean up the zip file
-	zip_path.unlink()
+	# Clean up the tar.gz file
+	tar_path.unlink()
 
 	# The extracted folder is named sf-cmake-{tag}, rename it to the target name
 	extracted_dir = TARGET_DIR.parent / f"sf-cmake-{args.tag}"
@@ -204,9 +205,12 @@ def do_create_symlink() -> int:
 
 # Handle --install option
 def do_install(args: argparse.Namespace) -> int:
-	"""Clone the repository if needed, create a symlink to build.py, and run build.py install --embed."""
-	# Clone if not already present
-	rc = do_clone(args)
+	"""Clone/extract the repository if needed, create a symlink to build.py, and run build.py install --embed."""
+	# Clone by default if not already present.
+	if args.extract:
+		rc = do_extract(args)
+	else:
+		rc = do_clone(args)
 	if rc != 0:
 		return rc
 	# Create symlink to build.py
