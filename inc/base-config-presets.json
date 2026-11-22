@@ -10,9 +10,9 @@
 			"name": ".base",
 			"hidden": true,
 			"cacheVariables": {
-				"____BASE_TEST___": {
+				"USE_QT_QUICK": {
 					"type": "BOOL",
-					"value": "ON"
+					"value": "OFF"
 				}
 			}
 		}
