@@ -10,7 +10,9 @@ from __future__ import annotations
 import argparse
 import subprocess
 import sys
+import urllib.request
 from pathlib import Path
+from zipfile import ZipFile
 
 # Default repository URL and tag
 REPO_URL = "https://github.com/scanframe-org/sf-cmake.git"
@@ -39,6 +41,12 @@ parser.add_argument(
 	default=DEFAULT_TAG,
 	help=f"Repository tag to clone (default: {DEFAULT_TAG}).",
 )
+parser.add_argument(
+	"-e",
+	"--extract",
+	action="store_true",
+	help="Download a zip archive from GitHub and extract it instead of cloning.",
+)
 
 
 # Parse command-line arguments
@@ -50,14 +58,18 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
 	args = parse_args()
 
-	# Show help if neither --clone nor --install flag is provided
-	if not args.clone and not args.install:
+	# Show help if no action flag is provided
+	if not args.clone and not args.install and not args.extract:
 		parser.print_help()
 		return 0
 
 	# Handle --install: clone if needed, then create symlink
 	if args.install:
 		return do_install(args)
+
+	# Handle --extract: download zip and extract
+	if args.extract:
+		return do_extract(args)
 
 	# Handle --clone: abort if target already exists
 	if TARGET_DIR.exists():
@@ -109,6 +121,56 @@ def do_clone(args: argparse.Namespace) -> int:
 	return 0
 
 
+# Download zip from GitHub and extract to target directory
+def do_extract(args: argparse.Namespace) -> int:
+	"""Download a zip archive from GitHub and extract it into the target directory."""
+	if TARGET_DIR.exists():
+		print(f"Error: Directory '{TARGET_DIR}' already exists. Aborting.", file=sys.stderr)
+		return 1
+
+	# Build the GitHub zip URL from the repo URL and tag
+	# REPO_URL is like https://github.com/scanframe-org/sf-cmake.git
+	# We need https://github.com/scanframe-org/sf-cmake/archive/refs/tags/{tag}.zip
+	repo_url = REPO_URL.rstrip("/").rstrip(".git")
+	zip_url = f"{repo_url}/archive/refs/tags/{args.tag}.zip"
+
+	# Create parent directory if needed
+	TARGET_DIR.parent.mkdir(parents=True, exist_ok=True)
+
+	# Download the zip file
+	zip_path = TARGET_DIR.parent / f"sf-cmake-{args.tag}.zip"
+	print(f"Downloading {zip_url}...")
+	try:
+		urllib.request.urlretrieve(zip_url, str(zip_path))
+	except urllib.error.URLError as e:
+		print(f"Error: Failed to download zip file.\n{e}", file=sys.stderr)
+		return 1
+
+	# Extract the zip file
+	print(f"Extracting to {TARGET_DIR.parent}...")
+	try:
+		with ZipFile(zip_path) as zf:
+			zf.extractall(TARGET_DIR.parent)
+	except Exception as e:
+		print(f"Error: Failed to extract zip file.\n{e}", file=sys.stderr)
+		zip_path.unlink(missing_ok=True)
+		return 1
+
+	# Clean up the zip file
+	zip_path.unlink()
+
+	# The extracted folder is named sf-cmake-{tag}, rename it to the target name
+	extracted_dir = TARGET_DIR.parent / f"sf-cmake-{args.tag}"
+	if extracted_dir.exists():
+		extracted_dir.rename(TARGET_DIR)
+	else:
+		print(f"Error: Expected extracted directory '{extracted_dir}' not found.", file=sys.stderr)
+		return 1
+
+	print(f"Successfully extracted cmake-lib at tag {args.tag}.")
+	return 0
+
+
 # Create symlink to build.py in project root
 def do_create_symlink() -> int:
 	"""Create a symlink from the project root to cmake/lib/bin/build.py.
@@ -155,13 +217,9 @@ def do_install(args: argparse.Namespace) -> int:
 	print("Running 'build.py project --embed'...")
 	result = subprocess.run(
 		[sys.executable, "build.py", "project", "--embed"],
-		capture_output=True,
+		capture_output=False,
 		text=True,
 	)
-	if result.stdout:
-		print(result.stdout, end="")
-	if result.stderr:
-		print(result.stderr, end="", file=sys.stderr)
 	if result.returncode != 0:
 		print(f"Error: 'build.py install --embed' failed with code {result.returncode}.", file=sys.stderr)
 		return result.returncode
