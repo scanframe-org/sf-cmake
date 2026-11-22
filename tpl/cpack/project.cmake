@@ -1,6 +1,9 @@
 # Required first entry checking the cmake version.
 cmake_minimum_required(VERSION 3.29...4.4)
 
+# Make it so our own modules are found and also the ones in the sub-module library.
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../..")
+
 # Include the CPackComponent module.
 include(CPackComponent)
 
@@ -17,13 +20,9 @@ else ()
 	set(WIN32 FALSE)
 endif ()
 
-
-# Make it so our own packages are found and also the ones in the sub-module library.
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_LIST_DIR}/../..")
-
 # Package needed for Sf_GetGitTagVersion().
-find_package(SfBase CONFIG REQUIRED)
-find_package(SfQtLibraryCommon CONFIG REQUIRED)
+include(SfBase)
+include(SfQtLibrary)
 
 # Report the found Git tag found version.
 Sf_ReportGitTagVersion("${SF_GIT_TAG_VERSIONS}")

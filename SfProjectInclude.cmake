@@ -57,9 +57,17 @@ else ()
 				Sf_ModifyTargetFlags("${_target}" ADD "doc")
 			endif ()
 		endforeach ()
+
 		# Add the project in the doc directory when it exists.
 		if (EXISTS "${CMAKE_SOURCE_DIR}/doc/CMakeLists.txt")
 			add_subdirectory("${CMAKE_SOURCE_DIR}/doc")
+		endif ()
+
+		# Add package build config when not building coverage.
+		if (NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
+			if (EXISTS "${SF_CPACK_PREPARE_FILE}")
+				include("${SF_CPACK_PREPARE_FILE}")
+			endif ()
 		endif ()
 
 	endif ()
