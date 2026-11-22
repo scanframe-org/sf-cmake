@@ -39,6 +39,8 @@ endif ()
 
 # Assemble the basename for the packages of this project.
 set(SF_PACKAGE_BASE_NAME "${CMAKE_PROJECT_NAME}")
+# Make the name lowercase just in case.
+string(TOLOWER "${SF_PACKAGE_BASE_NAME}" SF_PACKAGE_BASE_NAME)
 # Add toolchain information to package name
 if (CMAKE_CXX_COMPILER_ID)
 	string(TOLOWER "${CMAKE_CXX_COMPILER_ID}" SF_TOOLCHAIN_ID)

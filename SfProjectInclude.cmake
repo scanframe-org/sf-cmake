@@ -40,6 +40,9 @@ else ()
 
 	else ()
 
+		# Apply the run path to the targets.
+		Sf_SetRunPath(TARGETS ${_targets})
+
 		foreach (_target IN LISTS _targets)
 			get_target_property(_source_dir "${_target}" SOURCE_DIR)
 			set_target_properties(
@@ -56,6 +59,29 @@ else ()
 				# The 'doc' flag is picked up by the document project.
 				Sf_ModifyTargetFlags("${_target}" ADD "doc")
 			endif ()
+
+			if (_type MATCHES "^(EXECUTABLE|SHARED_LIBRARY)$")
+				# Get the linked libraries.
+				get_target_property(_libs ${_target} LINK_LIBRARIES)
+				set(_flags)
+				if ("Qt${QT_VERSION_MAJOR}::Core" IN_LIST _libs)
+					list(APPEND _flags "qt")
+				endif ()
+				# When the target is an executable.
+				if (_type STREQUAL "EXECUTABLE")
+					# And when Qt?::Gui is linked.
+					if ("Qt${QT_VERSION_MAJOR}::Gui" IN_LIST _libs)
+						# Set the target flag 'gui'.
+						list(APPEND _flags "gui")
+						# And when not.
+					else ()
+						# Set the target flag 'cli'.
+						list(APPEND _flags "cli")
+					endif ()
+				endif ()
+				Sf_ModifyTargetFlags("${_target}" ADD ${_flags})
+			endif ()
+
 		endforeach ()
 
 		# Add the project in the doc directory when it exists.

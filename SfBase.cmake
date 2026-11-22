@@ -52,7 +52,7 @@ if (SF_CMAKE_ROLE STREQUAL "PROJECT")
 	# - doc: part of the documentation.
 	# - pack: included in the CPack packaging.
 	# - qt: a dependency on the Qt framework for executables (no test apps).
-	# - pri: application is the primary application (AppImage) to start  when no symlink i used.
+	# - pri: application is the primary application (AppImage) to start  when no symlink is used.
 	#
 	define_property(
 		TARGET PROPERTY SF_FLAGS
@@ -1389,7 +1389,7 @@ endfunction()
 # @param REPORT  Optional flag. If given, prints the resulting BUILD_RPATH
 #        and INSTALL_RPATH for each processed target.
 #
-function(sf_SetRunPath)
+function(Sf_SetRunPath)
 	set(_options REPORT)
 	set(_one_value_args)
 	set(_multi_value_args TARGETS)

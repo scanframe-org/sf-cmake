@@ -270,18 +270,18 @@ exec \"\${script_dir}/../..${CPACK_PACKAGING_INSTALL_PREFIX}/${_OutputName}${_Ou
 # Determine how the application was called externally.
 invocation_name=$(basename "${ARGV0:-$0}")
 script_dir="$(dirname "$(readlink -f "$0")")"
-if [ -f "${script_dir}/usr/bin/${invocation_name}" ]; then
-	exec "${script_dir}/usr/bin/${invocation_name}" "$@"
-else
-	shopt -s nullglob
-	for file in "${script_dir}/usr/bin/"*; do
-		exec "${file}" "$@"
-		break
-	done
-fi
-]])
-		file(APPEND "${_filepath}" [[
-return $?
+# First try bash scripts in the bin directory and then the parent.
+for dir in "${script_dir}/usr/bin" "${script_dir}/usr" ; do
+  if [ -f "${script_dir}/usr/bin/${invocation_name}" ]; then
+    exec "${script_dir}/usr/bin/${invocation_name}" "$@"
+  else
+    shopt -s nullglob
+    for file in "${script_dir}/usr/bin/"*; do
+      exec "${file}" "$@"
+      break
+    done
+  fi
+done
 ]])
 		Sf_GetGitCommitDateTime(_DateTime "${CMAKE_CURRENT_LIST_DIR}")
 		list(GET _DateTime 0 SF_GIT_DATE)

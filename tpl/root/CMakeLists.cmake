@@ -80,7 +80,7 @@ if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/doc")
 endif ()
 
 # Set the 'RUNPATH' for all targets and report each target's values.
-sf_SetRunPath(REPORT)
+Sf_SetRunPath(REPORT)
 
 # Coverage report generator in the form af a test is added.
 # Only when testing is enabled and the build type is 'Coverage'.
