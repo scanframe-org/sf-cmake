@@ -104,31 +104,37 @@ class SubCommandProject(main.SubCommand):
 		# Assemble the files to be symlinked.
 		symlink_files = [
 			([dir_tpl, "root", "CMakePresets.json"], ["CMakePresets.json"]),
-			([dir_tpl, "root", "doc", "CMakeLists.txt"], ["doc", "CMakeLists.txt"]),
 			([dir_cmake_lib, "inc","base-config-presets.json"], ["cmake", "base-config-presets.json"]),
 			([dir_cmake_lib, "bin","check-format.sh"], ["check-format.sh"]),
 			([dir_cmake_lib, "bin","cmake-format.sh"], ["cmake-format.sh"]),
+			([dir_tpl, "root", "doc", "CMakeLists.txt"], ["doc", "CMakeLists.txt"]),
 		]
 		# Iterate through all the files with their final destinations.
 		for entry in symlink_files:
 			# From the source filepath.
 			src_file = os.path.join(dir_cmake_lib, *entry[0])
 			# Form the actual destination filepath.
+			dst_subdir = os.path.join(*entry[1][:1]) if len(entry[1]) > 1 else ""
 			dst_file = os.path.join(main.RUN_DIR, *entry[1])
+			# Check if the directory exists.
+			dst_dir = os.path.join(main.RUN_DIR, dst_subdir)
+			if not os.path.exists(dst_dir):
+				main.logger.info(f"# Skipping, destination directory does not exist: {dst_subdir}")
+				continue
 			# Check if the destination file already exists and skip it if it does.
 			if os.path.exists(dst_file):
-				main.logger.info(f"# Skipping existing file: {os.path.join(*entry[1])}")
+				main.logger.info(f"# Skipping, file exists: {os.path.join(*entry[1])}")
+				continue
+			main.logger.info(f"# Symlink file: '{entry[0]}' > '{os.path.join(*entry[1])}'.")
+			if not main.DEBUG_FLAG:
+				# Ignore if the source file does not exist.
+				if len(src_file) > 0:
+					if os.path.isfile(src_file):
+						os.symlink(src_file, dst_file)
+					else:
+						main.logger.warning(f": Missing source file: {src_file}")
 			else:
-				main.logger.info(f"# Symlink file: '{entry[0]}' > '{os.path.join(*entry[1])}'.")
-				if not main.DEBUG_FLAG:
-					# Ignore if the source file does not exist.
-					if len(src_file) > 0:
-						if os.path.isfile(src_file):
-							os.symlink(src_file, dst_file)
-						else:
-							main.logger.warning(f": Missing source file: {src_file}")
-				else:
-					main.logger.debug(f"~ Not creating symlink to: {src_file}")
+				main.logger.debug(f"~ Not creating symlink to: {src_file}")
 		return True
 
 
