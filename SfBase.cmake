@@ -720,11 +720,11 @@ endfunction()
 #
 function(Sf_AddExifTarget _Target)
 	# Windows only knows the 'python' command.
-	find_program(_PythonExe "python3" "python" REQUIRED)
+	find_program(PYTHON_EXECUTABLE NAMES "python3" "python" REQUIRED)
 	set(_trg "exif-${_Target}")
-	if (_PythonExe)
+	if (PYTHON_EXECUTABLE)
 		add_custom_target("${_trg}" ALL
-			COMMAND "${_PythonExe}" "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/bin/exiftool.py" $<SHELL_PATH:$<TARGET_FILE:${_Target}>>
+			COMMAND "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/bin/exiftool.py" $<SHELL_PATH:$<TARGET_FILE:${_Target}>>
 			WORKING_DIRECTORY "$<TARGET_FILE_DIR:${_Target}>"
 			DEPENDS "$<TARGET_FILE:${_Target}>"
 			COMMENT "Resource information: $<TARGET_FILE:${_Target}>"
@@ -1613,12 +1613,12 @@ function(Sf_GetDependencies _OutVar _BinFile)
 	# Parse the function arguments.
 	cmake_parse_arguments(PARSE_ARGV 2 _arg "RECURSE" "" "IGNORE_PATHS")
 	# Windows only knows the 'python' command.
-	find_program(_PythonExe NAMES "python3" "python" REQUIRED)
+	find_program(PYTHON_EXECUTABLE NAMES "python3" "python" REQUIRED)
 	# Needs to be defined.
 	if (NOT WIN32 AND NOT DEFINED CMAKE_LIBRARY_ARCHITECTURE)
 		message(FATAL_ERROR "Variable 'CMAKE_LIBRARY_ARCHITECTURE' is not defined!")
 	endif ()
-	set(_cmd "${_PythonExe}" "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/bin/dependencies.py" "--quiet" "--cmake"
+	set(_cmd "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/bin/dependencies.py" "--quiet" "--cmake"
 		"--exclude-system")
 	if (DEFINED CMAKE_LIBRARY_ARCHITECTURE)
 		list(APPEND _cmd "--lib-arch" "${CMAKE_LIBRARY_ARCHITECTURE}")
@@ -1677,8 +1677,8 @@ Retrieves dynamic library dependency filenames for a binary file.
 ]]
 function(Sf_GetDependencyFilenames _OutVar _BinFile)
 	# Windows only knows the 'python' command.
-	find_program(_PythonExe NAMES "python3" "python" REQUIRED)
-	set(_cmd "${_PythonExe}" "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/bin/dependencies.py" "--quiet" "--recurse" "--no-format")
+	find_program(PYTHON_EXECUTABLE NAMES "python3" "python" REQUIRED)
+	set(_cmd "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/bin/dependencies.py" "--quiet" "--recurse" "--no-format")
 	if (CMAKE_LIBRARY_ARCHITECTURE)
 		list(APPEND _cmd "--lib-arch" "${CMAKE_LIBRARY_ARCHITECTURE}")
 	endif ()

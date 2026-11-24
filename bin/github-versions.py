@@ -15,6 +15,7 @@ Matches the behavior of the provided bash script:
 """
 
 import sys
+from re import RegexFlag
 
 sys.dont_write_bytecode = True
 import argparse
@@ -27,11 +28,25 @@ import os
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-SEM_VER_RE = re.compile(r"^v?(\d+)\.(\d+)\.(\d+)$")
-REL_VER_RE = re.compile(r"^Release_(\d+)_(\d+)_(\d+)$")
+# REL_VER_RE = re.compile(r"^Release_(\d+)_(\d+)_(\d+)$")
+
+
+def get_version_regex(prefix: str | None) -> re.Pattern:
+	"""
+	Get the regex for matching version tags.
+	:param prefix: Version tag prefix other than the defaults 'v, Release_'.
+	:return:
+	"""
+	prefix = ["v", "Release_"] if prefix is None else [prefix]
+	return re.compile(r"^(" + '|'.join(prefix) + r")(\d+)[._](\d+)[._](\d+)$", RegexFlag.NOFLAG)
 
 
 def parse_owner_repo_from_url(url: str) -> Tuple[str, str]:
+	"""
+	Parse owner and repo from a GitHub URL.
+	:param url: GitHub URL.
+	:return: Owner and repo.
+	"""
 	url = url.strip()
 	if url.startswith("https://github.com/"):
 		path = url[len("https://github.com/"):]
@@ -66,6 +81,14 @@ def version_compare(a: str, b: str) -> int:
 
 
 def load_cache(cache_file: Path) -> Optional[List[dict]] | None:
+	"""
+	Attempts to read and decode JSON cache data from the supplied cache path.
+	Missing files and read or decode failures are handled gracefully so cache loading
+	does not interrupt the caller.
+
+	:param cache_file: The filesystem path to the cache file that should be loaded.
+	:return: The decoded cache data when available and valid; otherwise ``None``.
+	"""
 	if not cache_file.exists():
 		return None
 	# noinspection PyBroadException
@@ -77,16 +100,56 @@ def load_cache(cache_file: Path) -> Optional[List[dict]] | None:
 
 
 def save_cache(cache_file: Path, data: List[dict]) -> None:
+	"""
+	Persist cache data as JSON at the specified file path.
+
+	Ensures that the parent directory for the cache file exists before writing.
+	The provided data is serialized using JSON and written with UTF-8 encoding,
+	replacing any existing file contents at the destination.
+
+	:param cache_file: Destination path for the cache file.
+	:param data: Cache records to serialize and store.
+	:return: Nothing.
+	:raises OSError: If the directory cannot be created or the file cannot be opened or written.
+	:raises TypeError: If the provided data cannot be serialized as JSON.
+	"""
 	cache_file.parent.mkdir(parents=True, exist_ok=True)
 	with cache_file.open("w", encoding="utf-8") as f:
 		json.dump(data, f)
 
 
 def file_age_seconds(path: Path) -> float:
+	"""
+	Compute how long ago a filesystem entry was last modified.
+
+	The calculation uses the current system clock and the modification timestamp
+	reported by the filesystem metadata. The result reflects the elapsed time at
+	the moment the function is called and may be affected by clock changes,
+	filesystem timestamp precision, and platform-specific metadata behavior.
+
+	:param path: Filesystem path whose modification timestamp is inspected.
+	:return: Number of seconds elapsed since the path was last modified.
+	:raises OSError: If filesystem metadata for the path cannot be read.
+	"""
 	return time.time() - path.stat().st_mtime
 
 
 def fetch_tags(api_url: str) -> List[dict]:
+	"""
+	Fetch all tags from a paginated GitHub API endpoint.
+
+	The request is sent with the GitHub JSON media type and, when available,
+	an authentication token from the environment. Results are collected from
+	the initial endpoint and every linked next page until pagination is
+	exhausted.
+
+	:param api_url: GitHub API endpoint used to retrieve tags.
+	:return: Combined tag objects returned by all fetched pages.
+	:raises requests.HTTPError: If GitHub returns an unsuccessful HTTP status.
+	:raises requests.RequestException: If the request fails before a response is
+	    processed.
+	:raises ValueError: If a response body cannot be decoded as JSON.
+	"""
 	headers = {"Accept": "application/vnd.github+json"}
 	token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
 	if token:
@@ -100,31 +163,46 @@ def fetch_tags(api_url: str) -> List[dict]:
 		url = resp.links.get("next", {}).get("url")
 	return tags
 
-def extract_versions_from_tags(tags: List[dict]) -> List[str]:
+
+def extract_versions_from_tags(prefix: str | None, tags: List[dict]) -> List[str]:
+	"""
+	Extract version tags from a list of GitHub tags.
+	:param prefix: Version tag prefix other than the defaults 'v' and 'Release_'.
+	:param tags: List of GitHub tags.
+	:return: List of version tags.
+	"""
+	regex = get_version_regex(prefix)
 	versions = []
-	for t in tags:
-		name = t.get("name", "")
-		m = SEM_VER_RE.match(name)
-		if m:
-			versions.append("{}.{}.{}".format(m.group(1), m.group(2), m.group(3)))
-		else:
-			m = REL_VER_RE.match(name)
-			if m:
-				versions.append("{}.{}.{}".format(m.group(1), m.group(2), m.group(3)))
+	for tag in tags:
+		name = tag.get("name", "")
+		match = regex.match(name)
+		if match:
+			versions.append("{}.{}.{}".format(match.group(2), match.group(3), match.group(4)))
 	return versions
 
 
 def main(argv: List[str]) -> int:
-	parser = argparse.ArgumentParser(description="List version tags like v1.2.3 from a GitHub repo")
-	parser.add_argument("-o", "--owner", help="Repository owner")
-	parser.add_argument("-n", "--repo", help="Repository name")
-	parser.add_argument("-u", "--url", help="Browser URL from github (https://github.com/owner/repo.git)")
-	parser.add_argument("-f", "--find", dest="find_ver", help="Find the nearest version (<= given)")
-	parser.add_argument("-l", "--latest", action="store_true", help="Get the latest version")
-	parser.add_argument("-j", "--joined", action="store_true", help="Join versions with ';'")
-	parser.add_argument("-c", "--cache-dir", help="Directory used to store the cache file.")
-	parser.add_argument("--json", action="store_true", help="Print raw JSON from API")
+	"""
+	Run the script.
+	:param argv: Command line arguments
+	:return: Exit code.
+	"""
+	parser = argparse.ArgumentParser(description="List version tags like v1.2.3 from a GitHub repo.")
+	parser.add_argument("-o", "--owner", metavar="<owner>", help="Repository owner.")
+	parser.add_argument("-n", "--repo", metavar="<repo>", help="Repository name.")
+	parser.add_argument("-p", "--prefix", metavar="<prefix>", default=None,
+		help="Version tag prefix other then the defaults 'v' and 'Release_'.")
+	parser.add_argument("-u", "--url", metavar="<url>", help="Browser URL from github (https://github.com/owner/repo.git).")
+	parser.add_argument("-f", "--find-ver", metavar="<find-ver>", help="Find the nearest version (<= given).")
+	parser.add_argument("-l", "--latest", action="store_true", help="Get the latest version.")
+	parser.add_argument("-j", "--joined", action="store_true", help="Join versions with ';'.")
+	parser.add_argument("-c", "--cache-dir", metavar="<cache-dir>", help="Directory used to store the cache file.")
+	parser.add_argument("--json", action="store_true", help="Print raw JSON from API.")
 	args = parser.parse_args(argv)
+
+	# Special handling for passing an empty string from cmake using a list as options where an empty entry is not passed.
+	if args.prefix:
+		args.prefix = args.prefix.strip("'")
 
 	owner = args.owner
 	repo = args.repo
@@ -164,7 +242,7 @@ def main(argv: List[str]) -> int:
 				return 1
 			print("# Using stale cache file.", file=sys.stderr)
 			tags = stale
-	else:
+	elif not cache_age is None:
 		print(f"# Using cache file ({cache_age:.0f}s): {cache_file}", file=sys.stderr)
 
 	if args.json:
@@ -172,7 +250,7 @@ def main(argv: List[str]) -> int:
 		print(json.dumps(tags, indent=2), file=sys.stdout)
 		return 0
 
-	versions = extract_versions_from_tags(tags)
+	versions = extract_versions_from_tags(args.prefix, tags)
 	# sort ascending by semantic version
 	versions = sorted(set(versions), key=version_key)
 

@@ -182,25 +182,32 @@ endfunction()
 # @param _Owner Name of owner of the repository.
 # @param _Repository Name of the owners repository.
 # @param Optional boolean true for latest version only.
+# @param Optional string for the prefix of the version (by default 'v' or 'Release_'.
 #
 function(Sf_GetGitHubVersions _VarOut _Owner _Repository)
 	# Get the first optional argument.
-	Sf_GetOptionalArgument(_arg3 0 "${ARGN}")
-	if (_arg3)
-		# Set default version to the latest.
-		set(_Options "--latest")
-	else ()
-		set(_Options "--joined")
+	Sf_GetOptionalArgument(_latest 0 "${ARGN}")
+	Sf_GetOptionalArgument(_prefix 1 "${ARGN}")
+	set(_Options "--owner" "${_Owner}" "--repo" "${_Repository}")
+	# When argument was passed.
+	if (DEFINED _prefix)
+		# Be aware empty arguments cannot be passed in an options array.
+		list(APPEND _Options "--prefix" "'${_prefix}'")
 	endif ()
-	list(APPEND _Options "--owner" "${_Owner}" "--repo" "${_Repository}")
+	if (_latest)
+		# Set default version to the latest.
+		list(APPEND _Options "--latest")
+	else ()
+		list(APPEND _Options "--joined")
+	endif ()
 	cmake_path(CONVERT "${CMAKE_CURRENT_BINARY_DIR}/_cache" TO_NATIVE_PATH_LIST _NativeCacheDir)
 	#cmake_path(NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" _CacheDir)
 	# Make the cache dir to be in the binary directory so when that is deleted the cache is too.
 	list(APPEND _Options "--cache-dir" "${_NativeCacheDir}")
-	find_program(_PythonExe "python" REQUIRED)
-	if (_PythonExe)
+	find_program(PYTHON_EXECUTABLE NAMES "python3" "python" REQUIRED)
+	if (PYTHON_EXECUTABLE)
 		execute_process(
-			COMMAND ${_PythonExe} "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/bin/github-versions.py" ${_Options}
+			COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/bin/github-versions.py" ${_Options}
 			WORKING_DIRECTORY "${CMAKE_CURRENT_FUNCTION_LIST_DIR}"
 			OUTPUT_VARIABLE _Versions
 			OUTPUT_STRIP_TRAILING_WHITESPACE

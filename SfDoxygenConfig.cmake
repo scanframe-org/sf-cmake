@@ -165,7 +165,7 @@ function(Sf_AddDoxygenDocumentation _Target _DocBaseDir _ImageDirs _OutDir _Sour
 		add_custom_command(
 			TARGET ${_Target}
 			POST_BUILD
-			COMMAND ${_PythonExe} "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/bin/fix-doxygen-pu.py" ${_Options}
+			COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/bin/fix-doxygen-pu.py" ${_Options}
 			WORKING_DIRECTORY "${CMAKE_CURRENT_FUNCTION_LIST_DIR}"
 			COMMENT "Fix plantuml image generation when include files are used."
 		)
