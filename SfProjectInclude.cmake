@@ -3,7 +3,14 @@
 This include file's purpose is a helper for foreign repositories to modify
 it for the ./build.py script to function.
 
-The needs to be included multiple times into CMakeLists.txt file of the toplevel project.
+It is added by the 'sf-cmake.py' script, which installs this library into 'cmake/lib' without needing a Git submodule.
+Projects not depending on this library therefore do not have to add it as a submodule.
+
+The file needs to be included multiple times in the CMakeLists.txt file of the toplevel project, only when it is found:
+
+  if (EXISTS "${CMAKE_SOURCE_DIR}/cmake/lib/SfProjectInclude.cmake")
+    include("${CMAKE_SOURCE_DIR}/cmake/lib/SfProjectInclude.cmake")
+  endif ()
 
 1) Include before project creation.
 2) Include direct after project creation before targets are created.

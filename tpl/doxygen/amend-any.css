@@ -1,0 +1,15 @@
+/* Global font size: Material's default is 125% on large screens, 100% on small */
+:root {
+	--title-font-size: 20px;
+	--page-font-size: 14px;
+	--code-font-size: 13px;
+	/*
+	--navigation-font-size: 13px;
+	--toc-font-size: 13px;
+	*/
+}
+
+/* Doxygen image prevent visible caption. */
+div.image div.caption {
+	display: none;
+}

@@ -1,4 +1,10 @@
-# CMake Strategy {#cmake-strategy}
+---
+title: CMake Strategy 
+description: CMake Strategy
+ref: cmake-strategy
+---
+
+# CMake Strategy
 
 ## Overview
 
@@ -110,25 +116,25 @@ each preset type is illustrated in the diagrams below.
 #### Configure Presets
 
 ```plantuml
-!include ../cmake/lib/doc/cmake-presets-configure.puml
+!include cmake-presets-configure.puml
 ```
 
 #### Build Presets
 
 ```plantuml
-!include ../cmake/lib/doc/cmake-presets-build.puml
+!include cmake-presets-build.puml
 ```
 
 #### Test Presets
 
 ```plantuml
-!include ../cmake/lib/doc/cmake-presets-test.puml
+!include cmake-presets-test.puml
 ```
 
 #### Package Presets
 
 ```plantuml
-!include ../cmake/lib/doc/cmake-presets-package.puml
+!include cmake-presets-package.puml
 ```
 
 ### CLion IDE Integration
@@ -142,7 +148,7 @@ compilers (GNU, MinGW, MSVC) directly within the IDE without manual CMake config
 The complete build workflow follows a linear pipeline orchestrated by `build.py`:
 
 ```plantuml
-!include ../cmake/lib/doc/cmake-workflow.puml
+!include cmake-workflow.puml
 ```
 
 1. **Configure** — `build.py` selects a preset and invokes `cmake --preset <name>` to generate
@@ -159,7 +165,7 @@ When `Sf_AddTarget()` is called with the `VERSION` flag, the function `Sf_AddVer
 version information into the compiled binary. The approach differs between platforms:
 
 ```plantuml
-!include ../cmake/lib/doc/cmake-metadata.puml
+!include cmake-metadata.puml
 ```
 
 ### Windows (PE Resources)
@@ -331,7 +337,7 @@ Pipeline jobs run in Docker containers with pre-configured toolchains, eliminati
 manual compiler installation. The same Docker images are used for local Docker builds via `build.py`.
 
 ```plantuml
-!include ../cmake/lib/tpl/root/doc/ci-pipeline.puml
+!include ../../../doc/ci-pipeline.puml
 ```
 
 ## Cross-Platform & Cross-Compilation
@@ -339,7 +345,7 @@ manual compiler installation. The same Docker images are used for local Docker b
 The build system supports building for multiple platforms and architectures from a single codebase:
 
 ```plantuml
-!include ../cmake/lib/doc/cmake-platforms.puml
+!include cmake-platforms.puml
 ```
 
 ### Development Workflow Advantage

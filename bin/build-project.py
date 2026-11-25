@@ -106,8 +106,7 @@ class SubCommandProject(main.SubCommand):
 			([dir_tpl, "root", "CMakePresets.json"], ["CMakePresets.json"]),
 			([dir_cmake_lib, "inc","base-config-presets.json"], ["cmake", "base-config-presets.json"]),
 			([dir_cmake_lib, "bin","check-format.sh"], ["check-format.sh"]),
-			([dir_cmake_lib, "bin","cmake-format.sh"], ["cmake-format.sh"]),
-			([dir_tpl, "root", "doc", "CMakeLists.txt"], ["doc", "CMakeLists.txt"]),
+			([dir_cmake_lib, "bin","cmake-format.sh"], ["cmake-format.sh"])
 		]
 		# Iterate through all the files with their final destinations.
 		for entry in symlink_files:

@@ -4,7 +4,10 @@
 Library Installer and Extractor
 
 Installs the cmake-lib repository into the 'cmake/lib' directory
-at a specified tag (defaults to 'latest').
+at a specified tag (defaults to 'latest') by cloning or extracting an archive.
+This allows a project to use the library without adding it as a Git submodule.
+The project's top-level CMakeLists.txt can then include 'cmake/lib/SfProjectInclude.cmake'
+when found. Afterwards a 'build.py' symlink is created and 'build.py project' is run.
 """
 
 from __future__ import annotations
@@ -49,7 +52,7 @@ def do_extract(args: argparse.Namespace) -> int:
 		print(f"Directory '{TARGET_DIR}' already exists, extraction skipped.")
 		return 0
 	# Build the GitHub tar.gz URL from the repo URL and tag.
-	repo_url = REPO_URL.rstrip("/").rstrip(".git")
+	repo_url = REPO_URL.rstrip("/").removesuffix(".git")
 	tar_url = f"{repo_url}/archive/refs/tags/{args.tag}.tar.gz"
 	# Create parent directory if needed
 	TARGET_DIR.parent.mkdir(parents=True, exist_ok=True)
@@ -63,8 +66,13 @@ def do_extract(args: argparse.Namespace) -> int:
 		return 1
 	# Extract the tar.gz file
 	print(f"Extracting to {TARGET_DIR.parent}...")
+	extracted_dir = None
 	try:
 		with tarfile.open(tar_path, "r:gz") as tf:
+			# The top-level directory name in the archive may differ from the tag (e.g. a stripped 'v' prefix).
+			names = [m.name for m in tf.getmembers() if m.name.strip("./")]
+			if names:
+				extracted_dir = TARGET_DIR.parent / Path(names[0].lstrip("./")).parts[0]
 			tf.extractall(TARGET_DIR.parent)
 	except Exception as e:
 		print(f"Error: Failed to extract tar.gz file.\n{e}", file=sys.stderr)
@@ -72,9 +80,8 @@ def do_extract(args: argparse.Namespace) -> int:
 		return 1
 	# Clean up the tar.gz file
 	tar_path.unlink()
-	# The extracted folder is named sf-cmake-{tag}, rename it to the target name
-	extracted_dir = TARGET_DIR.parent / f"sf-cmake-{args.tag}"
-	if extracted_dir.exists():
+	# Rename the extracted top-level folder to the target name.
+	if extracted_dir and extracted_dir.exists():
 		extracted_dir.rename(TARGET_DIR)
 	else:
 		print(f"Error: Expected extracted directory '{extracted_dir}' not found.", file=sys.stderr)
@@ -157,7 +164,7 @@ def main() -> int:
 		parser.print_help()
 		return 0
 	# Extract by default if not already present.
-	if rc := (do_clone(args) if args.clone else do_extract(args)) != 0:
+	if rc := (do_clone(args) if args.clone else do_extract(args)):
 		return rc
 	if rc := do_create_symlink():
 		return rc

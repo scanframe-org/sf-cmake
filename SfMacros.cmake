@@ -136,45 +136,30 @@ function(Sf_IsSymlink _Path _ResultVar)
 endfunction()
 
 ##!
-# Finds all name subdirectories in a tree.
+# Finds all named subdirectories in a tree.
+# @param _OutVar Variable receiving the resulting directories.
 # @param _RootDir Root of the directory tree.
 # @param _RelativeToDir Result is relative to this directory.
 # @param _SubDir Names of the subdirectory to find.
-# @param _OutVar Variable receiving the resulting directories.
 #
-function(Sf_GetNamedSubdirectories _RootDir _RelativeToDir _SubDir _OutVar)
-	set(_Result "")
-	Sf_DoGetNamedSubdirectories("${_RootDir}" "${_SubDir}" _FullDirs)
-	foreach (_Dir ${_FullDirs})
-		file(RELATIVE_PATH _Dir "${_RelativeToDir}" "${_Dir}")
-		list(APPEND _Result "${_Dir}")
-	endforeach ()
-	set("${_OutVar}" ${_Result} PARENT_SCOPE)
-endfunction()
-
-##!
-# Used by Sf_GetNamedSubdirectories()
-#
-function(Sf_DoGetNamedSubdirectories _RootDir _SubDir _OutVar)
-	# Initialize empty list
-	set(_Result)
-	# Gather all immediate subdirectories of the root.
-	file(GLOB _Children RELATIVE "${_RootDir}" "${_RootDir}/*")
-	foreach (_Child ${_Children})
-		set(_ChildPath "${_RootDir}/${_Child}")
-		if (IS_DIRECTORY ${_ChildPath})
-			# Check if the directory name matches the target
-			if (_Child STREQUAL ${_SubDir})
-				list(APPEND _Result ${_ChildPath})
-			endif ()
-			# Recurse into the child directory.
-			Sf_DoGetNamedSubdirectories(${_ChildPath} "${_SubDir}" _SubDirs)
-			# Do not quote _SubDirs since it will add an empty entry to the list.
-			list(APPEND _Result ${_SubDirs})
-		endif ()
-	endforeach ()
-	# Set output variable with collected directories
-	set("${_OutVar}" ${_Result} PARENT_SCOPE)
+function(Sf_GetNamedSubdirectories  _OutVar _RootDir _RelativeToDir _SubDir)
+	get_filename_component(root_abs "${_RootDir}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+	get_filename_component(rel_abs  "${_RelativeToDir}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+	# Collect every entry below the root, directories included
+	file(GLOB_RECURSE all_entries LIST_DIRECTORIES TRUE "${root_abs}/*")
+	set(result)
+	foreach(entry IN LISTS all_entries)
+		if(IS_DIRECTORY "${entry}")
+			get_filename_component(name "${entry}" NAME)
+			list(FIND _SubDir "${name}" idx)
+			if(NOT idx EQUAL -1)
+				file(RELATIVE_PATH rel "${rel_abs}" "${entry}")
+				list(APPEND result "${rel}")
+			endif()
+		endif()
+	endforeach()
+	list(SORT result)
+	set(${_OutVar} "${result}" PARENT_SCOPE)
 endfunction()
 
 ##!

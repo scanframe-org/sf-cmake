@@ -9,6 +9,9 @@
 		{
 			"name": ".base",
 			"hidden": true,
+			"warnings": {
+				"unusedCli": false
+			},
 			"cacheVariables": {
 				"USE_QT_QUICK": {
 					"type": "BOOL",

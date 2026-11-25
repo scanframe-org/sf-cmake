@@ -1,4 +1,10 @@
-# Semantic Versioning {#semantic-versioning}
+---
+title: Semantic Versioning
+description: Semantic Versioning
+ref: semantic-versioning
+---
+
+# Semantic Versioning
 
 ## Conventional Commits Auto Version Bumping
 

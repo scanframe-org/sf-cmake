@@ -1,4 +1,10 @@
-# Agent Instructions: C/C++ Project
+---
+title: Agent Instructions
+description: Agent Instructions
+ref: agents-tpl
+---
+
+# Agent Instructions C/C++ Project
 
 ## Overview
 

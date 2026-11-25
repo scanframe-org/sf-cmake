@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Replacement for git.exe in Linux Wine, forwarding the call to a Git server on localhost."""
 import socket, os, sys, json
 
 # Get the port number which defaults to 9999.
@@ -6,6 +7,7 @@ PORT_NUMBER = int(os.environ.get("GIT_SERVER_PORT", "9999"))
 
 
 def main():
+	"""Sends the current directory and arguments to the Git server and relays its output. Returns the exit code."""
 	if len(sys.argv) == 1:
 		print(r"""
 Replacement for git.exe in Linux Wine.

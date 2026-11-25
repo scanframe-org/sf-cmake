@@ -74,9 +74,16 @@ endif ()
 
 # Add Sub Projects in the right order of dependencies.
 add_subdirectory(src)
-# Add Doxygen document project.
-if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/doc")
-	add_subdirectory(doc)
+
+# Add Doxygen document project when this is the top level project.
+if (PROJECT_IS_TOP_LEVEL)
+	# Include Markdown files recursively except for the root of the project.
+	set(_md_includes "*.md" "doc/*.md" "docs/*.md" "cmake/lib/tpl/root/AGENTS.md" "cmake/lib/doc/*.md" "src/*.md")
+	# Add doxygen project when SfDoxygen was found.
+	find_package(SfDoxygen 1.16.1 CONFIG QUIET)
+	if (SfDoxygen_FOUND)
+		Sf_AddDoxygenDocument("document" THEME INCLUDE ${_md_includes} LOGO "doc/logo.png" MAIN "doc/mainpage.md")
+	endif ()
 endif ()
 
 # Set the 'RUNPATH' for all targets and report each target's values.

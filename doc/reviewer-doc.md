@@ -1,13 +1,19 @@
-# Code Review {#code-review}
+---
+title: Code Review 
+description: Code Review
+ref: code-review
+---
+
+# Code Review
 
 ## General
 
-The result of a review is added in the [`REVIEW.md`](./REVIEW.md) file in the designated chapter.
+The result of a review is added in the `REVIEW.md`file in the designated chapter.
 Each remark gets its own numbered paragraph and a link to the file (s) in question with a line numer behind it.
 The remark should be written in an imperative mood, which means it should describe the action that is to be performed.
 For example, "Fix bug" rather than "Fixed bug".
 
-> Note: When JetBrains Junie is used in the console and issues are listed,
+> **Note:** When JetBrains Junie is used in the console and issues are listed,
 > create clickable links to the exact location in the file.
 
 ## Full Review

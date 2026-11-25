@@ -1248,7 +1248,7 @@ endfunction()
 
 ##!
 # Adds a file to be accessible by Doxygen which allows a single directory for examples and no subdirectories.
-# In a markdown the file is referenced as '[\@]snippet <prefix>/<file> <visible-name>'.
+# In a markdown the file is referenced as '[\@]snippet <prefix>/<file> <tag>' where <tag> is the marker name.
 # @param _Files List of files used as examples.
 # @param _Prefix Prefix for the destination filename to prevent naming collisions.
 #
@@ -1269,7 +1269,7 @@ function(Sf_AddExamples _Files _Prefix)
 		# Make a flat name of the filename replacing the slashes with a '-' character.
 		string(REPLACE "/" "-" _filename "${_filename}")
 		# When the file is relative prepend the list dir of the current project.
-		if (NOT IS_ABSOLUTE _file)
+		if (NOT IS_ABSOLUTE "${_file}")
 			set(_file "${CMAKE_CURRENT_LIST_DIR}/${_file}")
 		endif ()
 		# Copy the file to the destination.
@@ -1608,6 +1608,7 @@ Retrieves dynamic library dependencies for a binary file.
   RECURSE
   Option to recurse through the dependencies.
 
+Requires CMAKE_LIBRARY_ARCHITECTURE to be defined when not building on Windows.
 ]]
 function(Sf_GetDependencies _OutVar _BinFile)
 	# Parse the function arguments.
@@ -1666,10 +1667,10 @@ endfunction()
 #[[
 Retrieves dynamic library dependency filenames for a binary file.
 
-  Sf_GetDependencies(<out-var> <bin-file>
+  Sf_GetDependencyFilenames(<out-var> <bin-file>)
 
   <out-var>
-  Variable to store the resulting list of dependencies.
+  Variable to store the resulting list of dependency file names (recursive).
 
   <bin-file>
   Target binary file to analyze.

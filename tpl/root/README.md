@@ -65,7 +65,7 @@ For Windows builds and execution through Wine:
 ./build.py docker -- wine -- --build --test msvc-debug
 ```
 
-See [`cmake/lib/doc/build.md`](cmake/lib/doc/build.md) for all command options and supported environments.
+See [`../../doc/build-script.md`](cmake/lib/doc/build.md) for all command options and supported environments.
 
 ## Toolchains and presets
 
@@ -195,7 +195,7 @@ See [`gitlab-ci/README.md`](gitlab-ci/README.md) for the required GitLab variabl
 
 ## Further reading
 
-- [`cmake/lib/doc/build.md`](cmake/lib/doc/build.md): complete `build.py` command reference.
+- [`../../doc/build-script.md`](cmake/lib/doc/build.md): complete `build.py` command reference.
 - [`CMakePresets.md`](cmake/lib/tpl/root/CMakePresets.md): configure, build, test, package, and workflow presets.
 - [`gitlab-ci/README.md`](cmake/lib/tpl/root/gitlab-ci/README.md): GitLab CI variables and deployment setup.
 - [`cmake/lib/README.md`](cmake/lib/README.md): CMake library features, toolchains, coverage, and packaging details.

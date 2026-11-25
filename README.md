@@ -1,40 +1,12 @@
+---
+title: CMake Library
+description: CMake Library
+ref: readme-cmake
+---
+
 # CMake Library
 
-<!-- TOC -->
-* [CMake Library](#cmake-library)
-* [Introduction](#introduction)
-  * [General](#general)
-  * [Toolchains Supported](#toolchains-supported)
-  * [Quick start](#quick-start)
-  * [Windows 11: Sudo & Developer Mode](#windows-11-sudo--developer-mode)
-    * [Using: Ubuntu/Debian flavor of Linux:](#using-ubuntudebian-flavor-of-linux)
-    * [Using: Windows](#using-windows)
-  * [Project Directory Structure & Setup](#project-directory-structure--setup)
-    * [Structure](#structure)
-    * [Project Setup Information](#project-setup-information)
-  * [Qt Library Download](#qt-library-download)
-  * [Doxygen Document](#doxygen-document)
-  * [Git Versioning](#git-versioning)
-    * [Tagging](#tagging)
-  * [Semantic Versioning](#semantic-versioning)
-  * [GitLab-CI Pipeline](#gitlab-ci-pipeline)
-    * [Debian Package Upload Scheme](#debian-package-upload-scheme)
-  * [Coverage Reporting](#coverage-reporting)
-    * [Tools](#tools)
-    * [CMake Functions](#cmake-functions)
-  * [Code Format Checking and Fixing with Clang](#code-format-checking-and-fixing-with-clang)
-  * [Packaging](#packaging)
-    * [Project](#project)
-    * [Qt for Distribution](#qt-for-distribution)
-    * [Debian Package Versioning Specification](#debian-package-versioning-specification)
-      * [Version Structure](#version-structure)
-      * [Examples & Workflow](#examples--workflow)
-      * [CPack Configuration Guidelines](#cpack-configuration-guidelines)
-<!-- TOC -->
-
-# Introduction
-
-## General
+## Introduction
 
 This repository makes using CMake in C++ projects easier and features:
 

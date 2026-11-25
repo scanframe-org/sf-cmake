@@ -1,4 +1,10 @@
-# C++ Naming Conventions {#conventions}
+---
+title: Code Conventions
+description: Code Conventions
+ref: code-conventions
+---
+
+# C++ Naming Conventions
 
 ## Definitions
 
