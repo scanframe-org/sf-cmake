@@ -79,7 +79,7 @@ class SubCommandProject(main.SubCommand):
 			([dir_tpl, "root", "default.gitignore"], [".gitignore"]),
 			([dir_tpl, "root", "git-pre-commit-hook.sh"], [".git", "hooks", "pre-commit"]),
 			([dir_tpl, "root", "CMakePresets.json"], ["CMakePresets.json"]),
-			(["CMakeUserPresets.json"], ["CMakeUserPresets.json"])
+			([dir_tpl, "root", "CMakeUserPresets.json"], ["CMakeUserPresets.json"])
 		]
 		# Iterate through all the files with their final destinations.
 		for entry in tpl_files:

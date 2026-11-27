@@ -82,7 +82,10 @@ if (PROJECT_IS_TOP_LEVEL)
 	# Add doxygen project when SfDoxygen was found.
 	find_package(SfDoxygen 1.16.1 CONFIG QUIET)
 	if (SfDoxygen_FOUND)
-		Sf_AddDoxygenDocument("document" THEME INCLUDE ${_md_includes} LOGO "doc/logo.png" MAIN "doc/mainpage.md")
+		Sf_AddDoxygenDocument("document" THEME INCLUDE ${_md_includes}
+			LOGO "doc/logo.png"
+			MAIN "*"
+		)
 	endif ()
 endif ()
 

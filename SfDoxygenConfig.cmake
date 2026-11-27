@@ -9,7 +9,7 @@ include(FetchContent)
 # @param [DOCDIR] Name of documentation subdirectories to include. Defaults to 'doc'.
 # @param [INCLUDE] Relative glob patterns for files to include in the documentation.
 # @param [EXCLUDE] Regular expression used to filter files from the documentation.
-# @param [MAIN] Main page file relative to the BASEDIR.
+# @param [MAIN] Main page file relative to the BASEDIR when '*' is passed the main page is auto selected.
 # @param [LOGO] Logo file relative to the BASEDIR.
 # @param [THEME] Enable the Awesome Doxygen theme.
 # @param [TARGETS] Targets to generate the document about.
@@ -43,12 +43,14 @@ function(Sf_AddDoxygenDocument _Target)
 		set(_arg_DOCDIR "doc")
 	endif ()
 	if (NOT DEFINED _arg_MAIN OR _arg_MAIN STREQUAL "")
-		set(_arg_MAIN "${SfDoxygen_DIR}/tpl/root/doc/mainpage.md")
+		set(_arg_MAIN "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/tpl/root/doc/mainpage.md")
+	elseif (_arg_MAIN STREQUAL "*")
+		message(STATUS "${CMAKE_CURRENT_FUNCTION}: Auto select main page.")
 	else ()
 		set(_arg_MAIN "${_arg_BASEDIR}/${_arg_MAIN}")
 	endif ()
 	if (NOT DEFINED _arg_LOGO OR _arg_LOGO STREQUAL "")
-		set(_arg_LOGO "${SfDoxygen_DIR}/tpl/root/doc/logo.png")
+		set(_arg_LOGO "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/tpl/root/doc/logo.png")
 	endif ()
 	set(_list "")
 	# Make the relative glob patterns absolute.
@@ -95,7 +97,36 @@ function(Sf_AddDoxygenDocument _Target)
 		OUTPUT_STRIP_TRAILING_WHITESPACE
 		COMMAND_ERROR_IS_FATAL ANY
 	)
+	# Create a list from the output again.
 	string(REPLACE "\n" ";" _src_list "${_list_txt}")
+	# Check for auto select of main page.
+	if (_arg_MAIN STREQUAL "*")
+		set(_matched "")
+		foreach(_entry IN LISTS _src_list)
+			string(TOLOWER "${_entry}" _name)
+			get_filename_component(_name "${_name}" NAME)
+			# Exact matches go first so add with 'PREPEND'.
+			if(_name MATCHES "^(index|main|mainpage|main-page|start|startpage|start-page)\\.md$")
+				list(PREPEND _matched "${_entry}")
+				# Partial matches are ordered by 'rank' anyway so add with 'APPEND'.
+			elseif(_name MATCHES ".*(index|main|start).*\\.md$")
+				list(APPEND _matched "${_entry}")
+			endif()
+		endforeach()
+		# Just add the source list incase nothing was matched.
+		list(APPEND _matched ${_src_list})
+		# When a file was matched.
+		if (NOT _matched STREQUAL "")
+			list(GET _matched 0 _entry)
+			get_filename_component(DG_MainPage "${_bin_dir}/${_entry}" ABSOLUTE)
+		endif ()
+	else ()
+		# Set the MarkDown main page when it exists.
+		if (EXISTS "${_arg_MAIN}")
+			file(RELATIVE_PATH DG_MainPage "${_bin_dir}" "${_arg_MAIN}")
+			list(APPEND _src_list "${DG_MainPage}")
+		endif ()
+	endif ()
 	# When no targets are passed use the 'doc' flag to determine the targets to be include.
 	if (NOT DEFINED _arg_TARGETS)
 		# Retrieve all 'doc;' flagged targets from the global projects.
@@ -194,9 +225,6 @@ function(Sf_AddDoxygenDocument _Target)
 	endif ()
 	# Enable when to change the output directory.
 	file(RELATIVE_PATH DG_OutputDir "${_bin_dir}" "${_arg_OUTDIR}")
-	# Set the MarkDown main page for the manual.
-	file(RELATIVE_PATH DG_MainPage "${_bin_dir}" "${_arg_MAIN}")
-	list(APPEND _src_list "${DG_MainPage}")
 	# Remove possible duplicates.
 	list(REMOVE_DUPLICATES _src_list)
 	# Replace the list separator ';' with a space and a double quotes in the list to allow names with spaces in it.

@@ -2,7 +2,7 @@
 title: GitLab DevOps Project
 description: GitLab DevOps Project
 ref: main
-rank: 1000
+rank: 0
 ---
 
 # DevOps Project
