@@ -104,7 +104,8 @@ class SubCommandProject(main.SubCommand):
 		# Assemble the files to be symlinked.
 		symlink_files = [
 			([dir_tpl, "root", "CMakePresets.json"], ["CMakePresets.json"]),
-			([dir_cmake_lib, "inc","base-config-presets.json"], ["cmake", "base-config-presets.json"]),
+			# Use the injection configuration so nothing has to change in the cmake project.
+			([dir_cmake_lib, "inc","base-config-presets-inject.json"], ["cmake", "base-config-presets.json"]),
 			([dir_cmake_lib, "bin","check-format.sh"], ["check-format.sh"]),
 			([dir_cmake_lib, "bin","cmake-format.sh"], ["cmake-format.sh"])
 		]

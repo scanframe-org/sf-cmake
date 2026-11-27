@@ -41,6 +41,7 @@ if (NOT DEFINED SfBase_FOUND)
 		set(exclude_regex "/(tmp|temp|build|\\.cache)/")
 		set(result "")
 		foreach(dir IN LISTS ARGN)
+			string(PREPEND dir "${CMAKE_SOURCE_DIR}/")
 			if(IS_DIRECTORY "${dir}")
 				file(GLOB_RECURSE candidates LIST_DIRECTORIES false "${dir}/*logo*")
 				list(FILTER candidates EXCLUDE REGEX "${exclude_regex}")
@@ -51,6 +52,7 @@ if (NOT DEFINED SfBase_FOUND)
 				endif()
 			endif()
 		endforeach()
+		file(RELATIVE_PATH result "${CMAKE_SOURCE_DIR}" "${result}")
 		set(${out_var} "${result}" PARENT_SCOPE)
 	endfunction()
 
@@ -135,8 +137,10 @@ elseif (SfBase_FOUND STREQUAL "3")
 	if (SfDoxygen_FOUND)
 		# Include Markdown files recursively except for the root of the project.
 		set(_md_includes "*.md" "doc/*.md" "docs/*.md" "src/*.md")
+		# Try finding a logo of some kind.
 		_sf_find_logo(_logo_image "doc" "docs" "man")
-		Sf_AddDoxygenDocument("document" THEME INCLUDE ${_md_includes} LOGO "${_logo_image}" MAIN "doc/mainpage.md")
+		# Add the 'document' target using auto selected main page.
+		Sf_AddDoxygenDocument("document" THEME INCLUDE ${_md_includes} LOGO "${_logo_image}" MAIN "*")
 	endif ()
 
 	# Add package build config when not building coverage.

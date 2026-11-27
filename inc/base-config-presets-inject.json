@@ -1,0 +1,32 @@
+{
+	"version": 8,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 29,
+		"patch": 0
+	},
+	"configurePresets": [
+		{
+			"name": ".base",
+			"hidden": true,
+			"cacheVariables": {
+				"USE_QT_QUICK": {
+					"type": "BOOL",
+					"value": "OFF"
+				},
+				"QT_NO_PRIVATE_MODULE_WARNING": {
+					"type": "BOOL",
+					"value": "ON"
+				},
+				"CMAKE_PROJECT_INCLUDE_BEFORE": {
+					"type": "FILEPATH",
+					"value": "${sourceDir}/cmake/lib/SfProjectInclude.cmake"
+				},
+				"CMAKE_PROJECT_TOP_LEVEL_INCLUDES": {
+					"type": "STRING",
+					"value": "${sourceDir}/cmake/lib/SfProjectInclude.cmake"
+				}
+			}
+		}
+	]
+}
