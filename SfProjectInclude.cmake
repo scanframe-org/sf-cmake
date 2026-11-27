@@ -76,7 +76,6 @@ elseif (SfBase_FOUND STREQUAL "1")
 
 	set(SfBase_FOUND 2)
 
-	Sf_GetAllTargets(_targets "${CMAKE_SOURCE_DIR}" TRUE)
 	# Get the Qt version from the 'build.ini' file.
 	ini_read_value(_QtVer "${CMAKE_SOURCE_DIR}/build.ini" "config" "qt-ver" "6.10.1")
 	# Install/fetch the Qt Libraries when ENV{QT_VER_DIR} is not set.
@@ -87,7 +86,8 @@ elseif (SfBase_FOUND STREQUAL "3")
 	message(STATUS "Inject Final: ${CMAKE_CURRENT_LIST_FILE}")
 	# Set sentry.
 	set(SfBase_FOUND 3)
-
+	# Get all declared targets.
+	Sf_GetAllTargets(_targets "${CMAKE_SOURCE_DIR}" TRUE)
 	# Apply the run path to the targets.
 	Sf_SetRunPath(TARGETS ${_targets})
 

@@ -276,7 +276,7 @@ for dir in "${script_dir}/usr/bin" "${script_dir}/usr" ; do
     exec "${script_dir}/usr/bin/${invocation_name}" "$@"
   else
     shopt -s nullglob
-    for file in "${script_dir}/usr/bin/"*; do
+    for file in "${dir}"*; do
       exec "${file}" "$@"
       break
     done
