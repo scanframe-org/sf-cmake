@@ -22,6 +22,10 @@
 				".cfg-lnx"
 			],
 			"cacheVariables": {
+				"CPACK_GENERATOR": {
+					"type": "STRING",
+					"value": "TGZ;DEB;AppImage"
+				}
 			}
 		},
 		{
@@ -55,6 +59,10 @@
 				"CMAKE_BUILD_TYPE": {
 					"type": "STRING",
 					"value": "Release"
+				},
+				"CPACK_GENERATOR": {
+					"type": "STRING",
+					"value": "TGZ;DEB;AppImage"
 				}
 			}
 		}

@@ -359,6 +359,14 @@ endif ()
 # Set the cmake script cpack is going to run.
 set(CPACK_PROJECT_CONFIG_FILE "${CMAKE_CURRENT_LIST_DIR}/project.cmake")
 
+# Skip AppImage when the application data directory is not available.
+if (NOT WIN32 AND "AppImage" IN_LIST CPACK_GENERATOR)
+	if (NOT IS_DIRECTORY "${_ApplicationDir}")
+		list(REMOVE_ITEM CPACK_GENERATOR "AppImage")
+		message(WARNING "Skipping CPack AppImage generator because '${_ApplicationDir}' does not exist.")
+	endif ()
+endif ()
+
 # Force 'CPACK_COMPONENTS_ALL' before 'include(CPack)' generates 'CPackConfig.cmake' otherwise 'CPACK_COMPONENTS_ALL' is empty.
 if (NOT CPACK_COMPONENTS_ALL)
 	get_cmake_property(CPACK_COMPONENTS_ALL COMPONENTS)

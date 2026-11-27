@@ -21,12 +21,7 @@
 				".lnx-only"
 			],
 			"configurePreset": "gnu-debug",
-			"packageDirectory": "/tmp/$env{USER}-cpack/gnu",
-			"generators": [
-				"TGZ",
-				"DEB",
-				"AppImage"
-			]
+			"packageDirectory": "/tmp/$env{USER}-cpack/gnu"
 		},
 		{
 			"name": "gnu-release",
@@ -38,12 +33,7 @@
 				".lnx-only"
 			],
 			"configurePreset": "gnu-release",
-			"packageDirectory": "/tmp/$env{USER}-cpack/gnu",
-			"generators": [
-				"TGZ",
-				"DEB",
-				"AppImage"
-			]
+			"packageDirectory": "/tmp/$env{USER}-cpack/gnu"
 		}
 	]
 }

@@ -21,12 +21,7 @@
 			"displayName": "Debug GA",
 			"description": "GA TGZ + DEB package debug.",
 			"configurePreset": "ga-debug",
-			"packageDirectory": "/tmp/$env{USER}-cpack/ga",
-			"generators": [
-				"TGZ",
-				"DEB",
-				"AppImage"
-			]
+			"packageDirectory": "/tmp/$env{USER}-cpack/ga"
 		},
 		{
 			"name": "ga-release",
@@ -38,11 +33,7 @@
 				".lnx-only"
 			],
 			"configurePreset": "ga-release",
-			"packageDirectory": "/tmp/$env{USER}-cpack/ga",
-			"generators": [
-				"TGZ",
-				"DEB"
-			]
+			"packageDirectory": "/tmp/$env{USER}-cpack/ga"
 		}
 	]
 }
