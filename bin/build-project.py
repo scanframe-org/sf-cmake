@@ -130,7 +130,7 @@ class SubCommandProject(main.SubCommand):
 				# Ignore if the source file does not exist.
 				if len(src_file) > 0:
 					if os.path.isfile(src_file):
-						os.symlink(src_file, dst_file)
+						os.symlink(os.path.relpath(src_file, os.path.dirname(dst_file)), dst_file)
 					else:
 						main.logger.warning(f": Missing source file: {src_file}")
 			else:
