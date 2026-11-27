@@ -69,17 +69,22 @@ if (NOT DEFINED SfBase_FOUND)
 	list(GET _Versions 0 SF_GIT_TAG_VERSION)
 	list(GET _Versions 1 SF_GIT_TAG_RC)
 	list(GET _Versions 2 SF_GIT_TAG_COMMITS)
+	unset(_Versions)
 
 elseif (SfBase_FOUND STREQUAL "1")
 
 	message(STATUS "Inject After Project: ${CMAKE_CURRENT_LIST_FILE}")
-
+	# Up the sentry value.
 	set(SfBase_FOUND 2)
 
 	# Get the Qt version from the 'build.ini' file.
 	ini_read_value(_QtVer "${CMAKE_SOURCE_DIR}/build.ini" "config" "qt-ver" "6.10.1")
 	# Install/fetch the Qt Libraries when ENV{QT_VER_DIR} is not set.
 	find_package(SfQtLibrary "${_QtVer}" CONFIG REQUIRED)
+	# Only override the project version from the Git tag when the project when one is set and the git version is greater.
+	if (NOT CMAKE_PROJECT_VERSION STREQUAL "" AND CMAKE_PROJECT_VERSION VERSION_LESS "${SF_GIT_TAG_VERSION}")
+		Sf_SetProjectVersions("${SF_GIT_TAG_VERSION}" CURRENT TOP_LEVEL)
+	endif ()
 
 elseif (SfBase_FOUND STREQUAL "3")
 

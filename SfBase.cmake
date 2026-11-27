@@ -493,6 +493,47 @@ function(Sf_VersionToString _OutVar _Versions)
 endfunction()
 
 ##!
+# Sf_SetProjectVersions(<version> [TOP_LEVEL] [CURRENT])
+# Overrides the version of the project version .
+# <version> Version as on '1.2.3'.
+# [TOP_LEVEL] When set the top level version variables are set.
+# [CURRENT]   When set the current project version variables are set.
+#
+function(Sf_SetProjectVersions _Version )
+	cmake_parse_arguments(PARSE_ARGV 1 _arg "TOP_LEVEL;CURRENT" "" "")
+	if (NOT _version STREQUAL "")
+		string(REPLACE "." ";" _ver_list "${_Version}")
+		if (_arg_TOP_LEVEL)
+			set(CMAKE_PROJECT_VERSION "${_Version}" PARENT_SCOPE)
+		endif ()
+		if (_arg_CURRENT)
+			set(PROJECT_VERSION "${_Version}" PARENT_SCOPE)
+		endif ()
+		list(GET _ver_list 0 _entry)
+		if (_arg_TOP_LEVEL)
+			set(CMAKE_PROJECT_VERSION_MAJOR  "${_entry}" PARENT_SCOPE)
+		endif ()
+		if (_arg_CURRENT)
+			set(PROJECT_VERSION_MAJOR  "${_entry}" PARENT_SCOPE)
+		endif ()
+		list(GET _ver_list 1 _entry)
+		if (_arg_TOP_LEVEL)
+			set(CMNAKE_PROJECT_VERSION_MINOR "${_entry}" PARENT_SCOPE)
+		endif ()
+		if (_arg_CURRENT)
+			set(PROJECT_VERSION_MINOR "${_entry}" PARENT_SCOPE)
+		endif ()
+		list(GET _ver_list 2 _entry)
+		if (_arg_TOP_LEVEL)
+			set(CMAKE_PROJECT_VERSION_PATCH "${_entry}" PARENT_SCOPE)
+		endif ()
+		if (_arg_CURRENT)
+			set(PROJECT_VERSION_PATCH "${_entry}" PARENT_SCOPE)
+		endif ()
+	endif ()
+endfunction()
+
+##!
 # Set the target linker and compile options depending on the compiler ID and 'CMAKE_BUILD_TYPE' variable.
 #
 function(Sf_SetTargetDefaultOptions _Target)
