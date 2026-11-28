@@ -38,6 +38,22 @@ function(Sf_FindLinuxToolChainApps _CmakeFile _Prefix)
 			break()
 		endif ()
 	endforeach ()
+	# Get the sys root of the compiler.
+	if (EXISTS "${_CExe}")
+		execute_process(
+			COMMAND "${_CExe}" -print-sysroot
+			OUTPUT_VARIABLE _sys_root
+			OUTPUT_STRIP_TRAILING_WHITESPACE
+			RESULT_VARIABLE _exit_code
+		)
+		if (_exit_code EQUAL 0)
+			message(STATUS "CMAKE_SYSROOT: ${_sys_root}")
+			file(APPEND "${_CmakeFile}"
+				"set(CMAKE_SYSROOT \"${_sys_root}\")\n"
+			)
+		endif ()
+	endif ()
+
 	foreach (_Version RANGE 16 8 -1)
 		find_program(_GcovExe "${_Prefix}gcov-${_Version}" NO_CACHE)
 		if (_GcovExe)
@@ -99,10 +115,20 @@ function(Sf_SetToolChain)
 		Sf_FindLinuxToolChainApps("${_CmakeFile}" "/usr/bin/${_Arch}-linux-gnu-")
 		# Set the architecture of the targets being build also requires 'CMAKE_SYSTEM_NAME' to be set since this also
 		# sets 'CMAKE_CROSSCOMPILING' and makes a project not reset 'CMAKE_SYSTEM_PROCESSOR' for each created project.
+		# Variable 'PKG_CONFIG_LIBDIR' is needed to find the correct libraries using 'find_dependency()'.
 		file(APPEND "${_CmakeFile}" "##
 set(CMAKE_SYSTEM_NAME \"Linux\")
 set(CMAKE_SYSTEM_PROCESSOR \"aarch64\")
-		")
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+## Find the correct packages for the cross-compiler and linker.
+set(CMAKE_FIND_ROOT_PATH \"\${CMAKE_SYSROOT}\")
+set(ENV{PKG_CONFIG_SYSROOT_DIR} \"\${CMAKE_SYSROOT}\")
+set(ENV{PKG_CONFIG_LIBDIR}
+	\"\${CMAKE_SYSROOT}/usr/lib/aarch64-linux-gnu/pkgconfig:\${CMAKE_SYSROOT}/usr/lib/pkgconfig:\${CMAKE_SYSROOT}/usr/share/pkgconfig\")
+")
 		# When building Windows targets using GNU compiler on Windows.
 	elseif (SF_COMPILER STREQUAL "mingw" AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
 		set(_SystemName "Windows")
